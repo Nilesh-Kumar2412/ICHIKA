@@ -349,13 +349,25 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"Registration error: {e}")
 
+    active_model_name = "Gemma 4 12B QAT"
+    active_provider = "LM Studio Local"
+    try:
+        root_res = requests.get(f"{BACKEND_URL}/", timeout=5)
+        if root_res.status_code == 200:
+            r_data = root_res.json()
+            active_model_name = r_data.get("model") or active_model_name
+            active_provider = r_data.get("provider") or active_provider
+    except Exception:
+        pass
+
     st.markdown("---")
     st.markdown("##### System Status")
-    st.markdown("""
+    st.markdown(f"""
     • Status: Active & Operational<br>
-    • Backend Port: 8000<br>
-    • Network: Local IP / Hotspot
-    """)
+    • Model: <strong>{html.escape(active_model_name)}</strong><br>
+    • Provider: <strong>{html.escape(active_provider)}</strong><br>
+    • Backend Port: 8000
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
     st.markdown("##### Local Network Access")
@@ -382,15 +394,15 @@ with st.sidebar:
 # ─────────────────────────────────────────────────────────
 #  HERO BANNER (MATCHING THUMBNAIL REFERENCE LAYOUT)
 # ─────────────────────────────────────────────────────────
-st.html("""
+st.html(f"""
 <div class="ichika-hero-banner">
-  <div class="ichika-hero-kicker">AUTONOMOUS AGENTS • CODE WITH GEMMA</div>
+  <div class="ichika-hero-kicker">AUTONOMOUS AGENTS • ON-DEVICE LLM</div>
   <div class="ichika-hero-title">Project Ichika</div>
   <div class="ichika-hero-sub">
     Plans your week. Replans on the fly. Negotiates with your teammates — an autonomous agent running fully on-device, no cloud in sight.
   </div>
   <div class="ichika-pill-container">
-    <span class="ichika-pill-badge">Gemma 4 12B QAT</span>
+    <span class="ichika-pill-badge">{html.escape(active_model_name)}</span>
     <span class="ichika-pill-badge">Fully on-device</span>
     <span class="ichika-pill-badge">Ichika Moderators</span>
   </div>
