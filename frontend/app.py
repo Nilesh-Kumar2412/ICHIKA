@@ -317,15 +317,16 @@ with st.sidebar:
     else:
         st.markdown("##### Register New Profile")
         new_reg = st.text_input("Registration No.", key="sidebar_new_reg_no")
-        new_file = st.file_uploader("Upload timetable.json", type=["json"], key="sidebar_new_file")
+        new_file = st.file_uploader("Upload Timetable (PDF, MHTML, or JSON)", type=["json", "pdf", "mht", "mhtml"], key="sidebar_new_file")
         if st.button("Register & Switch", type="primary", width="stretch"):
             if not new_reg.strip():
                 st.warning("Please enter a registration number.")
             elif not new_file:
-                st.warning("Please select a timetable.json file.")
+                st.warning("Please select a timetable file.")
             else:
                 try:
-                    files = {"file": (new_file.name, new_file.getvalue(), "application/json")}
+                    mime = "application/pdf" if new_file.name.endswith(".pdf") else ("message/rfc822" if new_file.name.endswith((".mht", ".mhtml")) else "application/json")
+                    files = {"file": (new_file.name, new_file.getvalue(), mime)}
                     data = {"reg_no": new_reg.strip().upper()}
                     res = requests.post(f"{BACKEND_URL}/upload/timetable", data=data, files=files, timeout=30)
                     if res.status_code == 200:
