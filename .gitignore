@@ -1,6 +1,7 @@
 # Environment
 .env
 *.env.local
+.env.*
 
 # Python
 __pycache__/
@@ -12,18 +13,31 @@ __pycache__/
 dist/
 build/
 
-# Audio temp files
+# Testing & Caches
+.pytest_cache/
+.coverage
+htmlcov/
+.agents/
+
+# Audio & Temporary Media
 *.mp3
 *.mp4
 *.wav
+*.tmp
+*.log
 
-# OS artifacts
+# Scratch Scripts & Local Dumps
+scratch/
+.tempmediaStorage/
+
+# OS Artifacts
 .DS_Store
 Thumbs.db
 
-# IDE
+# IDE & Editor Settings
 .vscode/
 .idea/
+*.swp
 
 # Streamlit
 .streamlit/secrets.toml

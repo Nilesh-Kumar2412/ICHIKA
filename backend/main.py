@@ -1,3 +1,20 @@
+"""
+===============================================================================
+PROJECT ICHIKA — CAMPUS COPILOT BACKEND API SERVER
+===============================================================================
+
+FastAPI REST Application serving autonomous agents for VIT Chennai students:
+1. Academic Planner Agent (/plan)
+2. Autonomous Schedule Replanner Agent (/replan)
+3. Multi-Agent Group Study Coordinator (/negotiate)
+4. VTOP Timetable Extraction Engine (/timetable/extract)
+5. Campus Assistant Chat Endpoint (/chat)
+
+Powered by Gemma 4 (12B QAT) via LM Studio Local Server / Groq Cloud API,
+with 100% deterministic fallback engines guaranteeing zero-downtime offline operation.
+===============================================================================
+"""
+
 import os
 import json
 import uuid
@@ -292,12 +309,15 @@ def _resolve_student_id(
     body_sid: Optional[str] = None,
     body_reg: Optional[str] = None
 ) -> str:
-    return query_sid or query_reg or body_sid or body_reg or "26BEC1185"
+    sid = query_sid or query_reg or body_sid or body_reg or "26BEC1185"
+    return sid.strip().upper()
 
 @app.get("/plan")
 async def get_plan(student_id: Optional[str] = None, reg_no: Optional[str] = None):
     sid = _resolve_student_id(student_id, reg_no)
     timetable = load_student_file("timetable.json", sid)
+    if not timetable:
+        raise HTTPException(status_code=404, detail=f"No timetable found for student '{sid}'.")
     deadlines = load_student_file("deadlines.json", sid)
     events    = load_shared_file("events.json")
     mess_menu = load_shared_file("mess_menu.json")
@@ -309,6 +329,8 @@ async def post_plan(req: Optional[PlanRequest] = None, student_id: Optional[str]
     body_reg = req.reg_no if req else None
     sid = _resolve_student_id(student_id, reg_no, body_sid, body_reg)
     timetable = load_student_file("timetable.json", sid)
+    if not timetable:
+        raise HTTPException(status_code=404, detail=f"No timetable found for student '{sid}'.")
     deadlines = load_student_file("deadlines.json", sid)
     events    = load_shared_file("events.json")
     mess_menu = load_shared_file("mess_menu.json")
@@ -329,13 +351,16 @@ async def run_replan(req: ReplanRequest):
         elif isinstance(req.missed_item, str):
             missed_list.append(req.missed_item)
 
+    missed_list = [item.strip() for item in missed_list if item and item.strip()]
     if not missed_list:
-        missed_list = ["BACSE101 Python Lab"]
+        raise HTTPException(status_code=400, detail="Missing required field: 'missed_items' or 'missed_item'.")
 
     # Use current plan or generate initial plan for student
     current_plan = req.current_plan
     if not current_plan:
         timetable = load_student_file("timetable.json", sid)
+        if not timetable:
+            raise HTTPException(status_code=404, detail=f"No timetable found for student '{sid}'.")
         deadlines = load_student_file("deadlines.json", sid)
         events    = load_shared_file("events.json")
         mess_menu = load_shared_file("mess_menu.json")
@@ -347,7 +372,7 @@ async def run_replan(req: ReplanRequest):
 # ─── NEGOTIATE ENDPOINT (POST) ────────────────────────────
 @app.post("/negotiate")
 async def start_negotiation(req: NegotiateRequest):
-    participants = req.participants or req.teammates or ["26BLC1001", "26BLC1002", "26BLC1003"]
+    participants = req.participants or req.teammates or ["26BLC1001", "26BLC1002", "26BLC1003", "Aarav", "Ananya", "Rohan"]
     teammate_calendars = load_shared_file("teammate_calendars.json")
     filtered = {k: v for k, v in teammate_calendars.items() if k in participants}
     if not filtered:
@@ -385,6 +410,17 @@ async def extract_timetable_endpoint(
     if not file_path or not os.path.exists(file_path):
         # Default to Time_table.pdf if no file given
         file_path = os.path.join(DATA_DIR, "Time_table.pdf")
+
+    # Path traversal validation
+    real_target = os.path.realpath(file_path)
+    real_data_dir = os.path.realpath(DATA_DIR)
+    real_temp_dir = os.path.realpath(tempfile.gettempdir())
+
+    is_in_data = os.path.commonpath([real_target, real_data_dir]) == real_data_dir
+    is_in_temp = os.path.commonpath([real_target, real_temp_dir]) == real_temp_dir
+
+    if not (is_in_data or is_in_temp):
+        raise HTTPException(status_code=400, detail="Access denied: file_path must reside within DATA_DIR.")
 
     ext = os.path.splitext(file_path)[1].lower()
     if ext in [".mht", ".mhtml"]:

@@ -97,14 +97,7 @@ def get_fallback_replan(current_plan: List[Dict[str, Any]], missed_items: Union[
         items_list = missed_items or []
 
     if not current_plan:
-        default_label = items_list[0] if items_list else "BACSE101 Python Lab"
-        current_plan = [
-            {"day": "Monday", "items": [{"time": "09:00 - 10:40", "type": "class", "label": default_label, "priority": "High"}]},
-            {"day": "Tuesday", "items": []},
-            {"day": "Wednesday", "items": []},
-            {"day": "Thursday", "items": []},
-            {"day": "Friday", "items": []}
-        ]
+        return []
 
     if not items_list:
         return current_plan
@@ -126,48 +119,113 @@ def get_fallback_replan(current_plan: List[Dict[str, Any]], missed_items: Union[
     ]
 
     days_order = ["Wednesday", "Thursday", "Friday", "Monday", "Tuesday", "Saturday", "Sunday"]
+    all_days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
     for item_name in items_list:
         if not item_name or not str(item_name).strip():
             continue
         missed_lower = str(item_name).lower().strip()
+        missed_codes = [c.upper() for c in re.findall(r'[a-zA-Z]{3,5}\d{3}', str(item_name))]
+
+        # Check if missed item refers to an entire day (e.g. "Tuesday", "missed Tuesday")
+        matched_day = None
+        for d in all_days:
+            if d in missed_lower:
+                matched_day = d.capitalize()
+                break
+
         rescheduled = False
 
-        # Step 1: Mark original item as missed across current plan
-        for day_obj in updated_plan:
-            for item in day_obj.get("items", []):
-                label_lower = item.get("label", "").lower()
-                if missed_lower in label_lower and item.get("type") not in ("meal", "missed"):
-                    item["type"] = "missed"
-                    if not item["label"].startswith("[MISSED]"):
-                        item["label"] = f"[MISSED] {item['label']}"
+        if matched_day:
+            # Step 1A: Mark ALL non-meal items on matched_day as missed
+            missed_labels = []
+            for day_obj in updated_plan:
+                if day_obj.get("day", "").lower() == matched_day.lower():
+                    for item in day_obj.get("items", []):
+                        if item.get("type") not in ("meal", "missed"):
+                            item["type"] = "missed"
+                            raw_label = item["label"]
+                            if not raw_label.startswith("[MISSED]"):
+                                item["label"] = f"[MISSED] {raw_label}"
+                            missed_labels.append(raw_label)
 
-        # Step 2: Find free slot across ALL days (Monday-Sunday)
-        for target_day in days_order:
-            day_obj = next((d for d in updated_plan if d.get("day") == target_day), None)
-            if day_obj is None:
-                day_obj = {"day": target_day, "items": []}
-                updated_plan.append(day_obj)
+            # Step 2A: Reschedule each missed item from that day
+            for m_label in missed_labels:
+                rescheduled_item = False
+                for target_day in days_order:
+                    if target_day.lower() == matched_day.lower():
+                        continue  # Avoid rescheduling back onto the missed day
+                    day_obj = next((d for d in updated_plan if d.get("day") == target_day), None)
+                    if day_obj is None:
+                        day_obj = {"day": target_day, "items": []}
+                        updated_plan.append(day_obj)
 
-            existing_items = day_obj.get("items", [])
+                    existing_items = day_obj.get("items", [])
 
-            for target_time in candidate_times:
-                has_conflict = False
-                for existing in existing_items:
-                    if times_overlap(target_time, existing.get("time", "")):
-                        has_conflict = True
+                    for target_time in candidate_times:
+                        has_conflict = False
+                        for existing in existing_items:
+                            if times_overlap(target_time, existing.get("time", "")):
+                                has_conflict = True
+                                break
+                        if not has_conflict:
+                            existing_items.append({
+                                "time": target_time,
+                                "type": "replanned",
+                                "label": f"REPLANNED: Catch up on — {m_label}",
+                                "priority": "High"
+                            })
+                            rescheduled_item = True
+                            break
+
+                    if rescheduled_item:
                         break
-                if not has_conflict:
-                    existing_items.append({
-                        "time": target_time,
-                        "type": "replanned",
-                        "label": f"REPLANNED: Catch up on — {item_name}",
-                        "priority": "High"
-                    })
-                    rescheduled = True
-                    break
 
-            if rescheduled:
-                break
+        else:
+            # Step 1B: Mark specific course/activity item as missed across current plan
+            for day_obj in updated_plan:
+                for item in day_obj.get("items", []):
+                    label_str = item.get("label", "")
+                    label_lower = label_str.lower()
+                    label_codes = [c.upper() for c in re.findall(r'[a-zA-Z]{3,5}\d{3}', label_str)]
+                    
+                    is_match = False
+                    if missed_codes and label_codes:
+                        is_match = any(code in label_codes for code in missed_codes)
+                    if not is_match:
+                        is_match = missed_lower in label_lower or label_lower in missed_lower
+
+                    if is_match and item.get("type") not in ("meal", "missed"):
+                        item["type"] = "missed"
+                        if not item["label"].startswith("[MISSED]"):
+                            item["label"] = f"[MISSED] {item['label']}"
+
+            # Step 2B: Find free slot across ALL days (Monday-Sunday)
+            for target_day in days_order:
+                day_obj = next((d for d in updated_plan if d.get("day") == target_day), None)
+                if day_obj is None:
+                    day_obj = {"day": target_day, "items": []}
+                    updated_plan.append(day_obj)
+
+                existing_items = day_obj.get("items", [])
+
+                for target_time in candidate_times:
+                    has_conflict = False
+                    for existing in existing_items:
+                        if times_overlap(target_time, existing.get("time", "")):
+                            has_conflict = True
+                            break
+                    if not has_conflict:
+                        existing_items.append({
+                            "time": target_time,
+                            "type": "replanned",
+                            "label": f"REPLANNED: Catch up on — {item_name}",
+                            "priority": "High"
+                        })
+                        rescheduled = True
+                        break
+
+                if rescheduled:
+                    break
 
     return updated_plan

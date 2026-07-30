@@ -62,9 +62,10 @@ def test_multi_student_isolation():
     p1 = res1.get("plan", [])
     p2 = res2.get("plan", [])
 
-    # Schedules should both exist and be valid
+    # Schedules should both exist, be valid, and be isolated/distinct
     assert len(p1) == 5
     assert len(p2) == 5
+    assert p1 != p2
 
 def test_post_replan():
     payload = {

@@ -1,5 +1,5 @@
 {
-  "Aarav": {
+  "26BLC1001": {
     "free_slots": [
       { "day": "Monday", "time": "17:30 - 19:00" },
       { "day": "Tuesday", "time": "18:00 - 20:00" },
@@ -8,7 +8,7 @@
     ],
     "preferences": "Prefers late afternoons or evening slots after 17:30."
   },
-  "Ananya": {
+  "26BLC1002": {
     "free_slots": [
       { "day": "Monday", "time": "18:00 - 20:00" },
       { "day": "Tuesday", "time": "16:45 - 18:30" },
@@ -17,7 +17,7 @@
     ],
     "preferences": "Prefers Wednesday evening or Thursday evening."
   },
-  "Rohan": {
+  "26BLC1003": {
     "free_slots": [
       { "day": "Monday", "time": "17:30 - 19:00" },
       { "day": "Wednesday", "time": "17:30 - 19:30" },

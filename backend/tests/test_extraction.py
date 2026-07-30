@@ -65,3 +65,4 @@ def test_student_data_isolation():
 
     assert bec_data["student_info"]["reg_no"] == "26BEC1185"
     assert blc_data["student_info"]["reg_no"] == "26BLC1265"
+    assert bec_data["courses"] != blc_data["courses"]

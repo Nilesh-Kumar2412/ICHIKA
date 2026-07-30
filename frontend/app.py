@@ -36,24 +36,24 @@ if "messages" not in st.session_state:
 st.html("""
 <style>
 
-/* Global High-Contrast Overrides */
+/* Global Cyber-Violet Dark Theme Overrides matching thumbnail.jpeg */
 body, .stApp {
-    color: #0F172A !important;
-    background-color: #F8FAFC !important;
+    color: #F8FAFC !important;
+    background-color: #120F24 !important;
 }
 
-/* Sidebar styling - Prussian Blue background */
+/* Sidebar styling - Dark Cyber Violet background */
 section[data-testid="stSidebar"] {
-    background-color: #002147 !important;
-    border-right: 2px solid #CBD5E1 !important;
+    background-color: #0C0A19 !important;
+    border-right: 1px solid #2E2656 !important;
 }
 section[data-testid="stSidebar"] h1, 
 section[data-testid="stSidebar"] h2, 
 section[data-testid="stSidebar"] h3 {
-    color: #FFFFFF !important;
+    color: #F8FAFC !important;
 }
 section[data-testid="stSidebar"] label {
-    color: #FFA500 !important;
+    color: #C084FC !important;
     font-weight: 700 !important;
     font-size: 0.78rem !important;
     text-transform: uppercase;
@@ -63,65 +63,63 @@ section[data-testid="stSidebar"] p,
 section[data-testid="stSidebar"] li,
 section[data-testid="stSidebar"] label p,
 section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] p {
+    color: #CBD5E1 !important;
+}
+
+/* Sidebar inputs & selectboxes */
+section[data-testid="stSidebar"] input,
+section[data-testid="stSidebar"] div[data-baseweb="select"] {
+    background-color: #16122C !important;
+    color: #F8FAFC !important;
+    border: 1px solid #C084FC !important;
+}
+section[data-testid="stSidebar"] div[data-baseweb="select"] div {
     color: #F8FAFC !important;
 }
 
-/* Style inputs inside the sidebar to have light text and dark inputs */
-section[data-testid="stSidebar"] input,
-section[data-testid="stSidebar"] div[data-baseweb="select"] {
-    background-color: #001530 !important;
-    color: #FFFFFF !important;
-    border: 1px solid #FFA500 !important;
-}
-
-/* Make sure dropdown value text is visible in input state */
-section[data-testid="stSidebar"] div[data-baseweb="select"] div {
-    color: #FFFFFF !important;
-}
-
-/* Explicitly force dropdown options / listbox popup menus to have dark text on white backgrounds */
+/* Dropdown listbox popups - Dark panel with vibrant text */
 div[role="listbox"],
 div[role="listbox"] *,
 div[role="option"],
 div[role="option"] *,
 ul[role="listbox"] li,
 ul[role="listbox"] li * {
-    color: #0F172A !important;
-    background-color: #FFFFFF !important;
+    color: #F8FAFC !important;
+    background-color: #1C173B !important;
 }
 
-/* High Contrast Dropdowns */
 div[data-baseweb="select"] {
-    border: 1px solid #CBD5E1 !important;
-    border-radius: 4px !important;
+    border: 1px solid #3B3363 !important;
+    border-radius: 6px !important;
 }
 
 /* Thumbnail Reference Visual Layout Banner */
 .ichika-hero-banner {
-    background: linear-gradient(135deg, #001530 0%, #002147 60%, #0B192C 100%);
-    border: 1px solid #334155;
-    border-bottom: 3px solid #FFA500;
+    background: linear-gradient(135deg, #0F0C21 0%, #1A1536 60%, #120E29 100%);
+    border: 1px solid #3B3363;
+    border-bottom: 3px solid #C084FC;
     padding: 24px 32px;
-    border-radius: 8px;
+    border-radius: 10px;
     margin-bottom: 24px;
-    color: #FFFFFF;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #F8FAFC;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 .ichika-hero-kicker {
-    color: #FFA500;
+    color: #C084FC;
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: 2.5px;
     text-transform: uppercase;
     margin-bottom: 6px;
 }
 .ichika-hero-title {
     font-family: Georgia, serif;
-    font-size: 2.2rem;
+    font-size: 2.3rem;
     font-weight: 700;
     color: #FFFFFF;
     margin: 0 0 8px 0;
     letter-spacing: 0.5px;
+    text-shadow: 0 0 20px rgba(192, 132, 252, 0.3);
 }
 .ichika-hero-sub {
     color: #CBD5E1;
@@ -136,9 +134,9 @@ div[data-baseweb="select"] {
     flex-wrap: wrap;
 }
 .ichika-pill-badge {
-    background: rgba(255, 165, 0, 0.12);
-    border: 1px solid #FFA500;
-    color: #FFA500;
+    background: rgba(192, 132, 252, 0.12);
+    border: 1px solid #C084FC;
+    color: #E879F9;
     padding: 4px 14px;
     border-radius: 16px;
     font-size: 0.78rem;
@@ -148,11 +146,11 @@ div[data-baseweb="select"] {
 
 /* Custom Header Bar */
 .vtop-navbar {
-    background-color: #002147;
-    border: 1px solid #CBD5E1;
-    border-bottom: 3px solid #FFA500;
+    background-color: #1A1536;
+    border: 1px solid #3B3363;
+    border-bottom: 2px solid #38BDF8;
     padding: 14px 20px;
-    border-radius: 6px;
+    border-radius: 8px;
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -165,61 +163,61 @@ div[data-baseweb="select"] {
     margin: 0;
 }
 .vtop-sub {
-    color: #FFA500 !important;
+    color: #38BDF8 !important;
     font-size: 0.78rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 .vtop-user-pill {
-    background: #001530;
-    border: 1px solid #FFA500;
-    color: #FFFFFF !important;
+    background: #120E29;
+    border: 1px solid #C084FC;
+    color: #F8FAFC !important;
     padding: 6px 14px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.82rem;
     font-weight: 600;
 }
 
 /* Page Section Titles */
 .page-title {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    color: #002147 !important;
+    color: #F8FAFC !important;
     margin-bottom: 2px;
 }
 .page-sub {
     font-size: 0.85rem;
-    color: #334155 !important;
+    color: #94A3B8 !important;
     margin-bottom: 16px;
 }
 
-/* High-Contrast Schedule Table Item Card */
+/* Cyber-Violet Schedule Item Card */
 .schedule-item {
-    background-color: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-left: 5px solid #002147;
+    background-color: #181434;
+    border: 1px solid #2E2656;
+    border-left: 5px solid #C084FC;
     padding: 12px 16px;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
     gap: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
-.schedule-item-class    { border-left-color: #002147; }
-.schedule-item-meal     { border-left-color: #15803D; }
-.schedule-item-deadline { border-left-color: #B91C1C; }
-.schedule-item-event    { border-left-color: #B45309; }
-.schedule-item-study    { border-left-color: #6D28D9; }
-.schedule-item-replanned{ border-left-color: #0369A1; }
-.schedule-item-missed   { border-left-color: #64748B; opacity: 0.7; background-color: #F8FAFC; }
+.schedule-item-class    { border-left-color: #38BDF8; }
+.schedule-item-meal     { border-left-color: #4ADE80; }
+.schedule-item-deadline { border-left-color: #F87171; }
+.schedule-item-event    { border-left-color: #FBBF24; }
+.schedule-item-study    { border-left-color: #C084FC; }
+.schedule-item-replanned{ border-left-color: #0EA5E9; }
+.schedule-item-missed   { border-left-color: #64748B; opacity: 0.65; background-color: #120E27; }
 
 .schedule-time-badge {
     min-width: 120px;
     font-size: 0.85rem;
     font-weight: 700;
-    color: #0F172A !important;
+    color: #F8FAFC !important;
 }
 .schedule-type-tag {
     display: inline-block;
@@ -231,35 +229,35 @@ div[data-baseweb="select"] {
     min-width: 85px;
     text-align: center;
 }
-.tag-class     { background: #EFF6FF; color: #1D4ED8 !important; border: 1px solid #93C5FD; }
-.tag-meal      { background: #F0FDF4; color: #15803D !important; border: 1px solid #86EFAC; }
-.tag-deadline  { background: #FEF2F2; color: #B91C1C !important; border: 1px solid #FCA5A5; }
-.tag-event     { background: #FFFBEB; color: #B45309 !important; border: 1px solid #FDE68A; }
-.tag-study     { background: #F5F3FF; color: #6D28D9 !important; border: 1px solid #C4B5FD; }
-.tag-replanned { background: #F0F9FF; color: #0369A1 !important; border: 1px solid #7DD3FC; }
-.tag-missed    { background: #F1F5F9; color: #475569 !important; border: 1px solid #CBD5E1; }
+.tag-class     { background: rgba(56, 189, 248, 0.15); color: #38BDF8 !important; border: 1px solid #38BDF8; }
+.tag-meal      { background: rgba(74, 222, 128, 0.15); color: #4ADE80 !important; border: 1px solid #4ADE80; }
+.tag-deadline  { background: rgba(248, 113, 113, 0.15); color: #F87171 !important; border: 1px solid #F87171; }
+.tag-event     { background: rgba(251, 191, 36, 0.15); color: #FBBF24 !important; border: 1px solid #FBBF24; }
+.tag-study     { background: rgba(192, 132, 252, 0.15); color: #C084FC !important; border: 1px solid #C084FC; }
+.tag-replanned { background: rgba(14, 165, 233, 0.2); color: #38BDF8 !important; border: 1px solid #38BDF8; }
+.tag-missed    { background: rgba(148, 163, 184, 0.15); color: #94A3B8 !important; border: 1px solid #475569; }
 
 .schedule-label-text {
     flex: 1;
     font-size: 0.92rem;
     font-weight: 600;
-    color: #0F172A !important;
+    color: #F8FAFC !important;
 }
 .schedule-meta-text {
     font-size: 0.8rem;
-    color: #334155 !important;
+    color: #CBD5E1 !important;
     font-weight: 600;
 }
 
 /* Day Strip Header */
 .day-strip {
-    background-color: #002147;
-    border: 1px solid #001530;
+    background-color: #1A1536;
+    border: 1px solid #3B3363;
     color: #FFFFFF !important;
     font-weight: 700;
     font-size: 0.88rem;
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-top: 16px;
     margin-bottom: 10px;
     display: flex;
@@ -272,17 +270,17 @@ div[data-baseweb="select"] {
 
 /* Negotiation Log Items */
 .log-card {
-    background-color: #FFFFFF;
-    border: 1px solid #CBD5E1;
-    border-left: 4px solid #002147;
+    background-color: #181434;
+    border: 1px solid #2E2656;
+    border-left: 4px solid #38BDF8;
     padding: 12px 16px;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: 8px;
     font-size: 0.88rem;
-    color: #0F172A !important;
+    color: #F8FAFC !important;
 }
-.log-card-teammate { border-left-color: #FFA500; }
-.log-card-final    { border-left-color: #15803D; background-color: #F0FDF4; }
+.log-card-teammate { border-left-color: #C084FC; }
+.log-card-final    { border-left-color: #4ADE80; background-color: rgba(74, 222, 128, 0.1); }
 
 </style>
 """)
@@ -672,6 +670,19 @@ with tab_chat:
 
     tone_sel = st.selectbox("Persona Tone", ["formal", "casual", "concise"])
 
+    st.markdown("##### Quick Demo Prompts")
+    c_btn1, c_btn2, c_btn3 = st.columns(3)
+    preset_prompt = None
+    with c_btn1:
+        if st.button("Draft Missed Lab Email", width="stretch"):
+            preset_prompt = "Draft a formal email to my professor explaining I missed BACSE101 lab due to illness and requesting a make-up slot."
+    with c_btn2:
+        if st.button("Draft Teammate Message", width="stretch"):
+            preset_prompt = "Draft a WhatsApp message to my project teammates proposing a study session on Wednesday 18:00 - 20:00."
+    with c_btn3:
+        if st.button("Summarize Daily Agenda", width="stretch"):
+            preset_prompt = "Summarize my core class schedule, mess menu, and upcoming deadlines for today."
+
     st.markdown("---")
 
     for msg in st.session_state.messages:
@@ -680,7 +691,8 @@ with tab_chat:
         with st.chat_message(role):
             st.markdown(content)
 
-    chat_prompt = st.chat_input("Ask a question about your timetable or deadlines...")
+    chat_input_val = st.chat_input("Ask a question about your timetable or deadlines...")
+    chat_prompt = preset_prompt or chat_input_val
     if chat_prompt:
         st.session_state.messages.append({"role": "user", "content": chat_prompt})
         with st.chat_message("user"):

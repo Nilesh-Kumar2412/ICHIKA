@@ -11,6 +11,7 @@ USAGE:
 """
 
 import os
+import sys
 import re
 import json
 import argparse
@@ -384,7 +385,7 @@ def main():
     input_path = Path(args.input)
     if not input_path.exists():
         print(f"Error: Input file not found at {input_path}")
-        return
+        sys.exit(1)
 
     raw_text = extract_input_text(str(input_path), fmt=args.format)
 

@@ -219,15 +219,15 @@ def test_negotiator_custom_time_window_handling():
 def test_negotiator_teammate_consensus_aarav_ananya_rohan():
     """Verify consensus slot generation for Aarav, Ananya, and Rohan using actual shared json."""
     calendar_path = os.path.join(os.path.dirname(__file__), "..", "..", "data", "shared", "teammate_calendars.json")
-    with open(calendar_path, "r") as f:
+    with open(calendar_path, "r", encoding="utf-8") as f:
         calendars = json.load(f)
         
     res = run_negotiation(client=None, model=None, teammate_calendars=calendars)
     
     assert res["status"] == "success"
     assert res["rounds"] <= 3
-    assert res["final_slot"] is not None
-    print(f"Final Agreed Slot for Aarav, Ananya, Rohan: {res['final_slot']}")
+    assert res["final_slot"] == "Wednesday 18:00 - 20:00"
+    print(f"Final Agreed Slot for Teammates: {res['final_slot']}")
 
 def test_negotiator_time_matching_flaw():
     """Stress test: Check whether teammate fallback incorrectly accepts mismatched time on matching day."""
@@ -238,3 +238,14 @@ def test_negotiator_time_matching_flaw():
     print("Evaluation result for Wednesday 03:00 - 05:00:", eval_res)
     if eval_res["response"] == "ACCEPT":
         pytest.fail("HIGH RISK BUG: Teammate fallback accepts proposed slot at 3:00 AM because day matches, ignoring time window!")
+
+def test_replanner_day_name_miss_handling():
+    """Verify live replanning autonomy when user reports 'I missed Tuesday'."""
+    replanned = get_fallback_replan(SAMPLE_PLAN, ["I missed Tuesday"])
+    tuesday = next(d for d in replanned if d["day"] == "Tuesday")
+    tuesday_types = [item["type"] for item in tuesday["items"]]
+    assert "missed" in tuesday_types
+
+    # Ensure replanned catch-up items were added to open slots
+    all_types = [item["type"] for day in replanned for item in day["items"]]
+    assert "replanned" in all_types
