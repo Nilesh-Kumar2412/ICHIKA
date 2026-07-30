@@ -55,6 +55,7 @@ def run_negotiation(
     final_agreed_slot = None
 
     teammate_names = list(teammate_calendars.keys())
+    use_llm = True
 
     for round_num in range(1, max_rounds + 1):
         rounds_run = round_num
@@ -78,21 +79,26 @@ def run_negotiation(
                 proposed_slot=current_proposed_slot
             )
 
-            try:
-                response = client.chat.completions.create(
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": prompt},
-                        {"role": "user", "content": f"Evaluate the proposed study slot: {current_proposed_slot}"}
-                    ],
-                    temperature=0.2,
-                    timeout=5.0
-                )
-                raw_text = response.choices[0].message.content
-                cleaned = re.sub(r"```[\w]*", "", raw_text).strip()
-                cleaned = re.sub(r"```", "", cleaned).strip()
-                res = json.loads(cleaned)
-            except Exception as e:
+            res = None
+            if use_llm:
+                try:
+                    response = client.chat.completions.create(
+                        model=model,
+                        messages=[
+                            {"role": "system", "content": prompt},
+                            {"role": "user", "content": f"Evaluate the proposed study slot: {current_proposed_slot}"}
+                        ],
+                        temperature=0.2,
+                        timeout=3.0
+                    )
+                    raw_text = response.choices[0].message.content
+                    cleaned = re.sub(r"```[\w]*", "", raw_text).strip()
+                    cleaned = re.sub(r"```", "", cleaned).strip()
+                    res = json.loads(cleaned)
+                except Exception as e:
+                    use_llm = False
+                    res = evaluate_teammate_fallback(name, cal, current_proposed_slot)
+            else:
                 res = evaluate_teammate_fallback(name, cal, current_proposed_slot)
 
             round_responses[name] = res
@@ -120,21 +126,26 @@ def run_negotiation(
             round_num=round_num
         )
 
-        try:
-            coord_response = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": coordinator_prompt},
-                    {"role": "user", "content": f"Round {round_num}: Evaluate teammate responses and decide next action."}
-                ],
-                temperature=0.1,
-                timeout=5.0
-            )
-            raw_coord = coord_response.choices[0].message.content
-            cleaned_coord = re.sub(r"```[\w]*", "", raw_coord).strip()
-            cleaned_coord = re.sub(r"```", "", cleaned_coord).strip()
-            coord_decision = json.loads(cleaned_coord)
-        except Exception:
+        coord_decision = None
+        if use_llm:
+            try:
+                coord_response = client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": coordinator_prompt},
+                        {"role": "user", "content": f"Round {round_num}: Evaluate teammate responses and decide next action."}
+                    ],
+                    temperature=0.1,
+                    timeout=3.0
+                )
+                raw_coord = coord_response.choices[0].message.content
+                cleaned_coord = re.sub(r"```[\w]*", "", raw_coord).strip()
+                cleaned_coord = re.sub(r"```", "", cleaned_coord).strip()
+                coord_decision = json.loads(cleaned_coord)
+            except Exception:
+                use_llm = False
+                coord_decision = coordinator_fallback(round_responses, current_proposed_slot, all_accepted)
+        else:
             coord_decision = coordinator_fallback(round_responses, current_proposed_slot, all_accepted)
 
         coord_status = coord_decision.get("status", "REPROPOSING")
