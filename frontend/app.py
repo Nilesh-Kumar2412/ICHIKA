@@ -630,18 +630,19 @@ with tab_upload:
     with col_u1:
         st.markdown("##### File Upload Form")
         target_reg = st.text_input("Registration No.", value="26BLC1265", key="upload_reg_no")
-        tt_file = st.file_uploader("Upload timetable.json", type=["json"], key="tt_file_uploader")
+        tt_file = st.file_uploader("Upload Timetable (PDF, MHTML, or JSON)", type=["json", "pdf", "mht", "mhtml"], key="tt_file_uploader")
 
         if st.button("Upload Timetable Data", width="stretch"):
             if not tt_file or not target_reg.strip():
                 st.warning("Provide both Registration Number and file.")
             else:
                 try:
-                    files = {"file": (tt_file.name, tt_file.getvalue(), "application/json")}
+                    mime = "application/pdf" if tt_file.name.endswith(".pdf") else ("message/rfc822" if tt_file.name.endswith((".mht", ".mhtml")) else "application/json")
+                    files = {"file": (tt_file.name, tt_file.getvalue(), mime)}
                     data = {"reg_no": target_reg.strip()}
                     res = requests.post(f"{BACKEND_URL}/upload/timetable", data=data, files=files, timeout=30)
                     if res.status_code == 200:
-                        st.success(f"Successfully uploaded data for {target_reg.upper()}")
+                        st.success(f"Successfully uploaded & parsed data for {target_reg.upper()}")
                         st.session_state["selected_reg_no"] = target_reg.upper()
                         st.rerun()
                     else:

@@ -97,10 +97,16 @@ def get_fallback_replan(current_plan: List[Dict[str, Any]], missed_items: Union[
         items_list = missed_items or []
 
     if not current_plan:
-        return []
-
-    if not items_list:
-        return current_plan
+        if not items_list:
+            return []
+        default_label = items_list[0]
+        current_plan = [
+            {"day": "Monday", "items": [{"time": "09:00 - 10:40", "type": "class", "label": default_label, "priority": "High"}]},
+            {"day": "Tuesday", "items": []},
+            {"day": "Wednesday", "items": []},
+            {"day": "Thursday", "items": []},
+            {"day": "Friday", "items": []}
+        ]
 
     updated_plan = copy.deepcopy(current_plan)
 

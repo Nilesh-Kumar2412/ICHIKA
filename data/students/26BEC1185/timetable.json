@@ -54,7 +54,7 @@
     },
     {
       "code": "BAMAT101",
-      "title": "Multivariable Calculus and Diﬀerential Equations (Theory)",
+      "title": "Multivariable Calculus and Differential Equations (Theory)",
       "type": "Embedded Theory",
       "slot": "E2+TE2",
       "venue": "AB1-502",
@@ -63,7 +63,7 @@
     },
     {
       "code": "BAMAT101",
-      "title": "Multivariable Calculus and Diﬀerential Equations (Lab)",
+      "title": "Multivariable Calculus and Differential Equations (Lab)",
       "type": "Embedded Lab",
       "slot": "L1+L2",
       "venue": "AB1-607B",

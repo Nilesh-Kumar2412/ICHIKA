@@ -222,11 +222,11 @@ def build_schedule_context(reg_no: Optional[str]) -> str:
 #  UPLOAD HELPERS
 # ─────────────────────────────────────────────────────────
 ALLOWED_UPLOAD_FILES = {"timetable.json", "deadlines.json"}
-MAX_UPLOAD_BYTES = 512 * 1024  # 512 KB
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
 
 def _save_student_file(reg_no: str, filename: str, content: bytes) -> str:
     if len(content) > MAX_UPLOAD_BYTES:
-        raise HTTPException(status_code=413, detail=f"File too large. Max {MAX_UPLOAD_BYTES // 1024} KB.")
+        raise HTTPException(status_code=413, detail=f"File too large. Max {MAX_UPLOAD_BYTES // (1024 * 1024)} MB.")
     if filename not in ALLOWED_UPLOAD_FILES:
         raise HTTPException(status_code=400, detail=f"Allowed files: {ALLOWED_UPLOAD_FILES}")
     try:
@@ -277,15 +277,52 @@ async def get_all_data(reg_no: Optional[str] = None, student_id: Optional[str] =
 @app.post("/upload/timetable")
 async def upload_timetable(
     reg_no: str = Form(..., description="Student registration number"),
-    file: UploadFile = File(..., description="timetable.json file")
+    file: UploadFile = File(..., description="Timetable file (PDF, MHTML, or JSON)")
 ):
     content = await file.read()
-    path = _save_student_file(reg_no, "timetable.json", content)
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="File size exceeds 5MB limit.")
+
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    sid = reg_no.strip().upper()
+
+    if ext in [".pdf", ".mht", ".mhtml"]:
+        tmp_fd, tmp_path = tempfile.mkstemp(suffix=ext or ".pdf")
+        os.write(tmp_fd, content)
+        os.close(tmp_fd)
+
+        try:
+            if ext in [".mht", ".mhtml"]:
+                from extract_timetable import extract_mhtml_text
+                raw_text = extract_mhtml_text(tmp_path)
+            else:
+                from extract_timetable import extract_pdf_text
+                raw_text = extract_pdf_text(tmp_path)
+
+            structured = parse_vtop_deterministic(raw_text, student_id=sid)
+        finally:
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
+
+        out_dir = os.path.join(DATA_DIR, "students", sid)
+        os.makedirs(out_dir, exist_ok=True)
+        path = os.path.join(out_dir, "timetable.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(structured, f, indent=2, ensure_ascii=False)
+
+    elif ext in [".json", ""]:
+        path = _save_student_file(sid, "timetable.json", content)
+
+    else:
+        raise HTTPException(status_code=400, detail="Allowed timetable formats: .pdf, .mht, .mhtml, .json")
+
     return {
         "status":  "success",
-        "reg_no":  reg_no.upper(),
+        "reg_no":  sid,
         "saved":   path,
-        "message": f"Timetable uploaded for {reg_no.upper()}."
+        "message": f"Timetable successfully parsed and saved for {sid}."
     }
 
 @app.post("/upload/deadlines")
@@ -388,9 +425,13 @@ async def run_replan(req: ReplanRequest):
     return generate_replan(client, MODEL_TO_USE, current_plan, missed_list)
 
 # ─── NEGOTIATE ENDPOINT (POST) ────────────────────────────
+NAME_MAP = {"Aarav": "26BLC1001", "Ananya": "26BLC1002", "Rohan": "26BLC1003"}
+
 @app.post("/negotiate")
 async def start_negotiation(req: NegotiateRequest):
-    participants = req.participants or req.teammates or ["26BLC1001", "26BLC1002", "26BLC1003", "Aarav", "Ananya", "Rohan"]
+    raw_participants = req.participants or req.teammates or ["26BLC1001", "26BLC1002", "26BLC1003"]
+    participants = [NAME_MAP.get(p, p) for p in raw_participants]
+    
     teammate_calendars = load_shared_file("teammate_calendars.json")
     filtered = {k: v for k, v in teammate_calendars.items() if k in participants}
     
