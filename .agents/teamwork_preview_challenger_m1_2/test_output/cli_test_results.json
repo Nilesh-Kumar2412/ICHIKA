@@ -1,0 +1,37 @@
+[
+  {
+    "name": "CLI Help CP1252",
+    "status": "PASS",
+    "details": "Successfully ran --help under cp1252 without UnicodeEncodeError"
+  },
+  {
+    "name": "PDF Extraction (26BEC1185)",
+    "status": "PASS",
+    "details": "Schema Valid. Courses: 9"
+  },
+  {
+    "name": "MHTML Extraction (26BLC1265)",
+    "status": "PASS",
+    "details": "Schema Valid. Courses: 9"
+  },
+  {
+    "name": "Format 'auto' MHTML",
+    "status": "PASS",
+    "details": "Successfully auto-detected and extracted format mhtml"
+  },
+  {
+    "name": "Output Directory Target",
+    "status": "PASS",
+    "details": "Saved to C:\\Users\\Nileshkumar\\Downloads\\files\\.agents\\teamwork_preview_challenger_m1_2\\test_output\\dir_output\\timetable.json and schema valid"
+  },
+  {
+    "name": "Default Student Path",
+    "status": "PASS",
+    "details": "Correctly generated C:\\Users\\Nileshkumar\\Downloads\\files\\data\\students\\26TEST9999\\timetable.json"
+  },
+  {
+    "name": "Non-existent input error handling",
+    "status": "PASS",
+    "details": "Gracefully reported missing input file"
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "D1",
+    "course_code": "BACSE101",
+    "title": "Python Problem Solving Lab Assignment 2",
+    "due_day": "Wednesday",
+    "due_time": "23:59",
+    "priority": "High",
+    "description": "Submit completed Python exercises and test suite on VTOP portal."
+  },
+  {
+    "id": "D2",
+    "course_code": "BAECE103",
+    "title": "Network Theory Quiz 1 Revision",
+    "due_day": "Thursday",
+    "due_time": "18:00",
+    "priority": "Medium",
+    "description": "Review nodal analysis and Thevenin theorem problem set before quiz."
+  },
+  {
+    "id": "D3",
+    "course_code": "BAMAT101",
+    "title": "Multivariable Calculus Problem Set 3",
+    "due_day": "Friday",
+    "due_time": "17:00",
+    "priority": "High",
+    "description": "Solve double integral and partial derivative exercises."
+  }
+]

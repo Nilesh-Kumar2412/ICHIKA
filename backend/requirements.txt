@@ -1,0 +1,7 @@
+fastapi>=0.141.1,<0.200
+uvicorn>=0.52.0,<1.0
+pydantic>=2.13.0,<3.0
+openai>=2.50.0,<3.0
+gTTS>=2.5.0,<3.0
+pygame-ce>=2.5.7,<3.0
+python-dotenv>=1.2.0,<2.0

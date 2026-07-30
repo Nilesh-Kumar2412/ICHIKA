@@ -1,0 +1,29 @@
+{
+  "26BLC1001": {
+    "free_slots": [
+      { "day": "Monday", "time": "17:30 - 19:00" },
+      { "day": "Tuesday", "time": "18:00 - 20:00" },
+      { "day": "Wednesday", "time": "17:30 - 19:30" },
+      { "day": "Thursday", "time": "18:00 - 20:00" }
+    ],
+    "preferences": "Prefers late afternoons or evening slots after 17:30."
+  },
+  "26BLC1002": {
+    "free_slots": [
+      { "day": "Monday", "time": "18:00 - 20:00" },
+      { "day": "Tuesday", "time": "16:45 - 18:30" },
+      { "day": "Wednesday", "time": "17:30 - 19:30" },
+      { "day": "Friday", "time": "18:30 - 20:00" }
+    ],
+    "preferences": "Prefers Wednesday evening or Thursday evening."
+  },
+  "26BLC1003": {
+    "free_slots": [
+      { "day": "Monday", "time": "17:30 - 19:00" },
+      { "day": "Wednesday", "time": "17:30 - 19:30" },
+      { "day": "Thursday", "time": "17:30 - 19:00" },
+      { "day": "Friday", "time": "18:30 - 20:00" }
+    ],
+    "preferences": "Prefers Wednesday 17:30 - 19:30 slot."
+  }
+}

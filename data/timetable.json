@@ -1,0 +1,111 @@
+{
+  "student_info": {
+    "reg_no": "26BECXXXX",
+    "semester": "Fall Semester 2026-27",
+    "total_credits": 20.0
+  },
+  "courses": [
+    {
+      "code": "BACHY101",
+      "title": "Environmental Sciences",
+      "type": "Online Course",
+      "slot": "NIL",
+      "venue": "NIL",
+      "faculty": "SARAVANAKUMAR R"
+    },
+    {
+      "code": "BACSE101",
+      "title": "Problem Solving Using Python",
+      "type": "Lab Only",
+      "slot": "L7+L8+L25+L26",
+      "venue": "AB1-706",
+      "faculty": "JITENDRA TAHALYANI"
+    },
+    {
+      "code": "BAECE103",
+      "title": "Network Theory",
+      "type": "Theory Only",
+      "slot": "D2+TD2+TDD2",
+      "venue": "AB1-502",
+      "faculty": "ANITH NELLERI"
+    },
+    {
+      "code": "BAEEE101",
+      "title": "Basic Engineering",
+      "type": "Embedded Theory",
+      "slot": "B2+TB2",
+      "venue": "AB1-502",
+      "faculty": "PRANABA KUMAR MISHRO"
+    },
+    {
+      "code": "BAEEE101",
+      "title": "Basic Engineering",
+      "type": "Embedded Lab",
+      "slot": "L9+L10",
+      "venue": "AB1-807",
+      "faculty": "PRANABA KUMAR MISHRO"
+    },
+    {
+      "code": "BAMAT101",
+      "title": "Multivariable Calculus and Differential Equations",
+      "type": "Embedded Theory",
+      "slot": "E2+TE2",
+      "venue": "AB1-502",
+      "faculty": "NAZEER ANSARI"
+    },
+    {
+      "code": "BAMAT101",
+      "title": "Multivariable Calculus and Differential Equations",
+      "type": "Embedded Lab",
+      "slot": "L1+L2",
+      "venue": "AB1-607B",
+      "faculty": "NAZEER ANSARI"
+    },
+    {
+      "code": "BAPHY107",
+      "title": "Physics of Semiconductor Devices",
+      "type": "Embedded Theory",
+      "slot": "A2+TA2",
+      "venue": "AB1-502",
+      "faculty": "ATANU DUTTA"
+    },
+    {
+      "code": "BAPHY107",
+      "title": "Physics of Semiconductor Devices",
+      "type": "Embedded Lab",
+      "slot": "L15+L16",
+      "venue": "AB1-404P",
+      "faculty": "ATANU DUTTA"
+    }
+  ],
+  "schedule": {
+    "Monday": [
+      { "time": "08:00 - 09:40", "type": "class", "course": "BAMAT101 (Lab)", "slot": "L1+L2", "venue": "AB1-607B" },
+      { "time": "14:00 - 14:50", "type": "class", "course": "BAPHY107 (Theory)", "slot": "A2", "venue": "AB1-502" },
+      { "time": "15:50 - 16:40", "type": "class", "course": "BAECE103 (Theory)", "slot": "D2", "venue": "AB1-502" },
+      { "time": "16:45 - 17:35", "type": "class", "course": "BAEEE101 (Theory)", "slot": "TB2", "venue": "AB1-502" }
+    ],
+    "Tuesday": [
+      { "time": "08:00 - 09:40", "type": "class", "course": "BACSE101 (Lab)", "slot": "L7+L8", "venue": "AB1-706" },
+      { "time": "09:50 - 11:30", "type": "class", "course": "BAEEE101 (Lab)", "slot": "L9+L10", "venue": "AB1-807" },
+      { "time": "14:00 - 14:50", "type": "class", "course": "BAEEE101 (Theory)", "slot": "B2", "venue": "AB1-502" },
+      { "time": "15:50 - 16:40", "type": "class", "course": "BAMAT101 (Theory)", "slot": "E2", "venue": "AB1-502" }
+    ],
+    "Wednesday": [
+      { "time": "09:50 - 11:30", "type": "class", "course": "BAPHY107 (Lab)", "slot": "L15+L16", "venue": "AB1-404P" },
+      { "time": "14:55 - 15:45", "type": "class", "course": "BAPHY107 (Theory)", "slot": "A2", "venue": "AB1-502" },
+      { "time": "16:45 - 17:35", "type": "class", "course": "BAECE103 (Theory)", "slot": "TD2", "venue": "AB1-502" }
+    ],
+    "Thursday": [
+      { "time": "14:00 - 14:50", "type": "class", "course": "BAECE103 (Theory)", "slot": "D2", "venue": "AB1-502" },
+      { "time": "14:55 - 15:45", "type": "class", "course": "BAEEE101 (Theory)", "slot": "B2", "venue": "AB1-502" },
+      { "time": "16:45 - 17:35", "type": "class", "course": "BAMAT101 (Theory)", "slot": "TE2", "venue": "AB1-502" }
+    ],
+    "Friday": [
+      { "time": "08:00 - 09:40", "type": "class", "course": "BACSE101 (Lab)", "slot": "L25+L26", "venue": "AB1-706" },
+      { "time": "14:00 - 14:50", "type": "class", "course": "BAMAT101 (Theory)", "slot": "E2", "venue": "AB1-502" },
+      { "time": "15:50 - 16:40", "type": "class", "course": "BAPHY107 (Theory)", "slot": "TA2", "venue": "AB1-502" },
+      { "time": "17:40 - 18:30", "type": "class", "course": "BAECE103 (Theory)", "slot": "TDD2", "venue": "AB1-502" }
+    ]
+  }
+}

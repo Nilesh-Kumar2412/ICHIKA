@@ -1,0 +1,37 @@
+[
+  {
+    "name": "GET /students",
+    "status": "PASS",
+    "details": "Found registered students: ['26BEC1185', '26BLC1265']"
+  },
+  {
+    "name": "GET /plan Profile Switching",
+    "status": "PASS",
+    "details": "26BEC1185 Monday items: 7, 26BLC1265 Monday items: 7. Schedules distinct: True"
+  },
+  {
+    "name": "POST /plan Profile Switching",
+    "status": "PASS",
+    "details": "Both 26BEC1185 and 26BLC1265 returned 5-day plans via POST"
+  },
+  {
+    "name": "GET /data Data Isolation",
+    "status": "PASS",
+    "details": "Isolated: 26BEC1185 reg=26BEC1185 faculty=SARAVANAKUMAR R | 26BLC1265 reg=26BLC1265 faculty=KRISHNENDU BISWAS"
+  },
+  {
+    "name": "POST /replan Isolation",
+    "status": "PASS",
+    "details": "Successfully generated replans independently for both student profiles"
+  },
+  {
+    "name": "POST /timetable/extract Student Path",
+    "status": "PASS",
+    "details": "Saved paths: BEC=C:\\Users\\Nileshkumar\\Downloads\\files\\data\\students\\26BEC1185\\timetable.json, BLC=C:\\Users\\Nileshkumar\\Downloads\\files\\data\\students\\26BLC1265\\timetable.json"
+  },
+  {
+    "name": "POST /chat Student Isolation",
+    "status": "PASS",
+    "details": "Successfully accepted student_id for both BEC and BLC chat requests"
+  }
+]
