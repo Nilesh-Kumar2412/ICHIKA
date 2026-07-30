@@ -164,6 +164,12 @@ class ExtractRequest(BaseModel):
     reg_no: Optional[str] = None
     file_path: Optional[str] = None
 
+class CodeCompareRequest(BaseModel):
+    code_a: str
+    code_b: str
+    language: Optional[str] = "python"
+    problem_title: Optional[str] = "Algorithm Optimization Benchmark"
+
 # ─────────────────────────────────────────────────────────
 #  DATA LOADING — MULTI-STUDENT AWARE
 # ─────────────────────────────────────────────────────────
@@ -603,6 +609,112 @@ async def chat(req: ChatRequest):
     except Exception:
         fallback_msg = generate_smart_chat_fallback(req.text, sid, req.tone)
         return {"response": fallback_msg, "source": "fallback"}
+
+# ─── COMPARATIVE CODING ENDPOINT (POST) ─────────────────────
+def analyze_code_comparison_fallback(code_a: str, code_b: str, language: str, problem_title: str) -> dict:
+    def estimate_complexity(code: str):
+        lines = [l.strip() for l in code.splitlines() if l.strip() and not l.strip().startswith("#")]
+        nested_loop = False
+        loop_count = 0
+        in_loop = False
+        for l in lines:
+            if any(k in l for k in ["for ", "while "]):
+                if in_loop:
+                    nested_loop = True
+                in_loop = True
+                loop_count += 1
+        
+        if nested_loop:
+            t_comp = "O(N²)"
+            score = 65
+        elif loop_count > 0:
+            if "log" in code.lower() or "// 2" in code or ">> 1" in code or "bisect" in code:
+                t_comp = "O(N log N)"
+                score = 88
+            else:
+                t_comp = "O(N)"
+                score = 82
+        elif any(k in code for k in ["binary_search", "bisect", "mid ="]):
+            t_comp = "O(log N)"
+            score = 95
+        else:
+            t_comp = "O(1)"
+            score = 98
+
+        s_comp = "O(N)" if ("append(" in code or "new " in code or "[" in code) else "O(1)"
+        return t_comp, s_comp, score
+
+    t_a, s_a, score_a = estimate_complexity(code_a)
+    t_b, s_b, score_b = estimate_complexity(code_b)
+
+    winner = "Solution A" if score_a >= score_b else "Solution B"
+    margin = abs(score_a - score_b)
+
+    return {
+        "status": "success",
+        "source": "deterministic_evaluator",
+        "problem_title": problem_title,
+        "language": language,
+        "solution_a": {
+            "time_complexity": t_a,
+            "space_complexity": s_a,
+            "efficiency_score": score_a,
+            "summary": f"Evaluated as {t_a} time complexity with {s_a} auxiliary space."
+        },
+        "solution_b": {
+            "time_complexity": t_b,
+            "space_complexity": s_b,
+            "efficiency_score": score_b,
+            "summary": f"Evaluated as {t_b} time complexity with {s_b} auxiliary space."
+        },
+        "comparison": {
+            "winner": winner,
+            "verdict": f"{winner} is more optimal by {margin} efficiency points.",
+            "recommendation": f"For VIT lab evaluations, prefer {winner} due to lower algorithmic overhead and cleaner memory allocation."
+        }
+    }
+
+@app.post("/compare-code")
+async def compare_code(req: CodeCompareRequest):
+    if not req.code_a.strip() or not req.code_b.strip():
+        raise HTTPException(status_code=400, detail="Both code_a and code_b must be provided.")
+
+    lang = req.language or "python"
+    title = req.problem_title or "Algorithm Benchmark"
+
+    try:
+        system_prompt = (
+            "You are an expert algorithm evaluator and competitive programming mentor for VIT students.\n"
+            "Compare two code implementations for efficiency, asymptotic time/space complexity, and code readability.\n"
+            "Return ONLY valid JSON matching this schema:\n"
+            "{\n"
+            '  "status": "success",\n'
+            '  "problem_title": "Title",\n'
+            '  "language": "python",\n'
+            '  "solution_a": {"time_complexity": "O(...)", "space_complexity": "O(...)", "efficiency_score": 85, "summary": "..."},\n'
+            '  "solution_b": {"time_complexity": "O(...)", "space_complexity": "O(...)", "efficiency_score": 92, "summary": "..."},\n'
+            '  "comparison": {"winner": "Solution B", "verdict": "...", "recommendation": "..."}\n'
+            "}"
+        )
+        user_prompt = f"PROBLEM: {title}\nLANGUAGE: {lang}\n\n=== CODE SOLUTION A ===\n{req.code_a}\n\n=== CODE SOLUTION B ===\n{req.code_b}"
+
+        response = client.chat.completions.create(
+            model=MODEL_TO_USE,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.2,
+            timeout=5.0
+        )
+        raw_text = response.choices[0].message.content
+        cleaned = re.sub(r"```[\w]*", "", raw_text).strip()
+        cleaned = re.sub(r"```", "", cleaned).strip()
+        parsed = json.loads(cleaned)
+        parsed["source"] = "llm"
+        return parsed
+    except Exception:
+        return analyze_code_comparison_fallback(req.code_a, req.code_b, lang, title)
 
 if __name__ == "__main__":
     import uvicorn
