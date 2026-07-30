@@ -56,7 +56,7 @@ if GROQ_API_KEY and GROQ_API_KEY != "your_groq_api_key_here":
 else:
     client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY, timeout=30.0)
     MODEL_TO_USE = LM_STUDIO_MODEL
-    PROVIDER_NAME = f"LM Studio Local ({LM_STUDIO_MODEL})"
+    PROVIDER_NAME = "LM Studio Local (Gemma 4 12B QAT)"
 
 # ─────────────────────────────────────────────────────────
 #  FASTAPI APP

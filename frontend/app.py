@@ -365,10 +365,10 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("##### System Status")
-    st.markdown(f"""
+    st.markdown("""
     • Status: Active & Operational<br>
-    • Model: <strong>{html.escape(active_model_name)}</strong><br>
-    • Provider: <strong>{html.escape(active_provider)}</strong><br>
+    • Model: <strong>Gemma 4 12B QAT</strong><br>
+    • Provider: <strong>LM Studio Local / Groq Cloud API</strong><br>
     • Backend Port: 8000
     """, unsafe_allow_html=True)
 
@@ -397,15 +397,15 @@ with st.sidebar:
 # ─────────────────────────────────────────────────────────
 #  HERO BANNER (MATCHING THUMBNAIL REFERENCE LAYOUT)
 # ─────────────────────────────────────────────────────────
-st.html(f"""
+st.html("""
 <div class="ichika-hero-banner">
-  <div class="ichika-hero-kicker">AUTONOMOUS AGENTS • ON-DEVICE LLM</div>
+  <div class="ichika-hero-kicker">AUTONOMOUS AGENTS • CODE WITH GEMMA</div>
   <div class="ichika-hero-title">Project Ichika</div>
   <div class="ichika-hero-sub">
     Plans your week. Replans on the fly. Negotiates with your teammates — an autonomous agent running fully on-device, no cloud in sight.
   </div>
   <div class="ichika-pill-container">
-    <span class="ichika-pill-badge">{html.escape(active_model_name)}</span>
+    <span class="ichika-pill-badge">Gemma 4 12B QAT</span>
     <span class="ichika-pill-badge">Fully on-device</span>
     <span class="ichika-pill-badge">Ichika Moderators</span>
   </div>
