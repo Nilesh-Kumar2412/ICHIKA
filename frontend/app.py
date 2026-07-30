@@ -304,7 +304,7 @@ with st.sidebar:
 
     BACKEND_URL = st.text_input("API Base Endpoint", key="backend_url")
 
-    available_students = ["26BEC1185", "26BLC1265"]
+    available_students = ["26BEC1185", "26BLC1265", "26BLC1001", "26BLC1002", "26BLC1003"]
     try:
         res = requests.get(f"{BACKEND_URL}/students", timeout=5)
         if res.status_code == 200:

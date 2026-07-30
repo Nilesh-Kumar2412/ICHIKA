@@ -1,0 +1,59 @@
+{
+  "student_info": {
+    "reg_no": "26BLC1002",
+    "display_name": "Ananya Patel (26BLC1002)",
+    "branch": "B.Tech Electrical & Electronics",
+    "semester": "Fall Semester 2026-27",
+    "total_credits": 6.0
+  },
+  "courses": [
+    {
+      "code": "BAEEE201",
+      "title": "Signals & Systems",
+      "type": "Theory Only",
+      "slot": "B1+TB1",
+      "venue": "AB1-401",
+      "faculty": "RAJESH M",
+      "credits": 4.0
+    },
+    {
+      "code": "BAEEE202",
+      "title": "Analog Electronics Lab",
+      "type": "Lab Only",
+      "slot": "L27+L28",
+      "venue": "AB1-408",
+      "faculty": "SNEHA K",
+      "credits": 2.0
+    }
+  ],
+  "schedule": {
+    "Monday": [],
+    "Tuesday": [
+      {
+        "time": "08:00 - 08:50",
+        "type": "class",
+        "course": "BAEEE201 (Theory)",
+        "slot": "B1",
+        "venue": "AB1-401"
+      }
+    ],
+    "Wednesday": [],
+    "Thursday": [],
+    "Friday": [
+      {
+        "time": "08:00 - 08:50",
+        "type": "class",
+        "course": "BAEEE201 (Theory)",
+        "slot": "TB1",
+        "venue": "AB1-401"
+      },
+      {
+        "time": "09:50 - 11:30",
+        "type": "class",
+        "course": "BAEEE202 (Lab)",
+        "slot": "L27+L28",
+        "venue": "AB1-408"
+      }
+    ]
+  }
+}

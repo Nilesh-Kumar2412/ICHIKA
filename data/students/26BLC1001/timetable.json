@@ -1,0 +1,59 @@
+{
+  "student_info": {
+    "reg_no": "26BLC1001",
+    "display_name": "Aarav Verma (26BLC1001)",
+    "branch": "B.Tech Computer Science (AI & ML)",
+    "semester": "Fall Semester 2026-27",
+    "total_credits": 5.0
+  },
+  "courses": [
+    {
+      "code": "BACSE301",
+      "title": "Artificial Intelligence (Theory)",
+      "type": "Theory Only",
+      "slot": "F1+TF1",
+      "venue": "AB2-301",
+      "faculty": "VIKRAM S",
+      "credits": 3.0
+    },
+    {
+      "code": "BACSE302",
+      "title": "Machine Learning Lab",
+      "type": "Lab Only",
+      "slot": "L19+L20",
+      "venue": "AB2-405",
+      "faculty": "ANITHA P",
+      "credits": 2.0
+    }
+  ],
+  "schedule": {
+    "Monday": [
+      {
+        "time": "09:00 - 09:50",
+        "type": "class",
+        "course": "BACSE301 (Theory)",
+        "slot": "F1",
+        "venue": "AB2-301"
+      }
+    ],
+    "Tuesday": [],
+    "Wednesday": [],
+    "Thursday": [
+      {
+        "time": "08:00 - 09:40",
+        "type": "class",
+        "course": "BACSE302 (Lab)",
+        "slot": "L19+L20",
+        "venue": "AB2-405"
+      },
+      {
+        "time": "10:00 - 10:50",
+        "type": "class",
+        "course": "BACSE301 (Theory)",
+        "slot": "TF1",
+        "venue": "AB2-301"
+      }
+    ],
+    "Friday": []
+  }
+}

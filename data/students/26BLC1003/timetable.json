@@ -1,0 +1,59 @@
+{
+  "student_info": {
+    "reg_no": "26BLC1003",
+    "display_name": "Rohan Gupta (26BLC1003)",
+    "branch": "B.Tech Mechanical Engineering",
+    "semester": "Fall Semester 2026-27",
+    "total_credits": 5.0
+  },
+  "courses": [
+    {
+      "code": "BAMEC101",
+      "title": "Engineering Mechanics",
+      "type": "Theory Only",
+      "slot": "D1+TD1",
+      "venue": "AB1-305",
+      "faculty": "GUPTA N",
+      "credits": 3.0
+    },
+    {
+      "code": "BAMEC102",
+      "title": "CAD / CAM Lab",
+      "type": "Lab Only",
+      "slot": "L5+L6",
+      "venue": "AB1-310",
+      "faculty": "DINESH C",
+      "credits": 2.0
+    }
+  ],
+  "schedule": {
+    "Monday": [
+      {
+        "time": "10:00 - 10:50",
+        "type": "class",
+        "course": "BAMEC101 (Theory)",
+        "slot": "D1",
+        "venue": "AB1-305"
+      },
+      {
+        "time": "11:40 - 13:20",
+        "type": "class",
+        "course": "BAMEC102 (Lab)",
+        "slot": "L5+L6",
+        "venue": "AB1-310"
+      }
+    ],
+    "Tuesday": [],
+    "Wednesday": [],
+    "Thursday": [
+      {
+        "time": "08:00 - 08:50",
+        "type": "class",
+        "course": "BAMEC101 (Theory)",
+        "slot": "TD1",
+        "venue": "AB1-305"
+      }
+    ],
+    "Friday": []
+  }
+}

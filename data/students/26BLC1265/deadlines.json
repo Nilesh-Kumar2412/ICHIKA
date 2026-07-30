@@ -1,38 +1,18 @@
 [
   {
-    "id": "DL-BLC-1",
-    "title": "BACSE101 Python Lab Report — Experiment 3",
-    "course_code": "BACSE101",
-    "due_day": "Thursday",
-    "due_time": "23:59",
-    "priority": "High",
-    "description": "Submit completed code + output screenshots for Experiment 3 on lists and functions to the course page."
-  },
-  {
-    "id": "DL-BLC-2",
-    "title": "BAECE103 Network Theory CAT-1 Preparation",
-    "course_code": "BAECE103",
-    "due_day": "Wednesday",
-    "due_time": "09:00",
-    "priority": "High",
-    "description": "Continuous Assessment Test 1 covering Mesh and Nodal Analysis. Venue: AB1-508."
-  },
-  {
-    "id": "DL-BLC-3",
-    "title": "BAMAT101 Tutorial Sheet 2",
-    "course_code": "BAMAT101",
-    "due_day": "Friday",
-    "due_time": "17:35",
-    "priority": "Medium",
-    "description": "Submit solved problems on partial differentiation to faculty during tutorial slot TE2."
-  },
-  {
-    "id": "DL-BLC-4",
-    "title": "BACHY101 Online Module 3 Quiz",
-    "course_code": "BACHY101",
+    "id": "D1",
+    "course_code": "BACSE201",
+    "title": "DSA Tree Balancing Assignment",
     "due_day": "Tuesday",
     "due_time": "23:59",
-    "priority": "Medium",
-    "description": "Complete online quiz on Biodiversity and Conservation on the VTOP course page."
+    "priority": "High"
+  },
+  {
+    "id": "D2",
+    "course_code": "BACSE202",
+    "title": "SQL Query Optimization Lab",
+    "due_day": "Friday",
+    "due_time": "17:00",
+    "priority": "Medium"
   }
 ]

@@ -215,10 +215,10 @@ def load_shared_file(filename: str, default=None):
 def list_registered_students() -> list[str]:
     students_dir = os.path.join(DATA_DIR, "students")
     if not os.path.isdir(students_dir):
-        return ["26BEC1185", "26BLC1265"]
+        return ["26BEC1185", "26BLC1265", "26BLC1001", "26BLC1002", "26BLC1003"]
     st_list = [d for d in os.listdir(students_dir)
                if os.path.isdir(os.path.join(students_dir, d))]
-    return sorted(list(set(st_list + ["26BEC1185", "26BLC1265"])))
+    return sorted(list(set(st_list))) if st_list else ["26BEC1185", "26BLC1265", "26BLC1001", "26BLC1002", "26BLC1003"]
 
 def build_schedule_context(reg_no: Optional[str]) -> str:
     timetable = load_student_file("timetable.json", reg_no)
