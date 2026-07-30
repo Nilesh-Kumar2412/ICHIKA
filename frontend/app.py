@@ -313,7 +313,10 @@ with st.sidebar:
     )
 
     if reg_choice != "+ Upload New Profile":
-        st.session_state["selected_reg_no"] = reg_choice
+        if st.session_state["selected_reg_no"] != reg_choice:
+            st.session_state["selected_reg_no"] = reg_choice
+            st.session_state.plan_data = None
+            st.session_state.replan_data = None
     else:
         st.markdown("##### Register New Profile")
         new_reg = st.text_input("Registration No.", key="sidebar_new_reg_no")
@@ -332,6 +335,8 @@ with st.sidebar:
                     if res.status_code == 200:
                         st.success(f"Registered {new_reg.upper()}!")
                         st.session_state["selected_reg_no"] = new_reg.upper()
+                        st.session_state.plan_data = None
+                        st.session_state.replan_data = None
                         st.rerun()
                     else:
                         st.error(f"Registration failed: {res.text}")

@@ -52,11 +52,11 @@ LM_STUDIO_MODEL    = os.getenv("LM_STUDIO_MODEL",    "gemma-4-12b-qat")
 GROQ_API_KEY       = os.getenv("GROQ_API_KEY")
 
 if GROQ_API_KEY and GROQ_API_KEY != "your_groq_api_key_here":
-    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=GROQ_API_KEY, timeout=2.0)
+    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=GROQ_API_KEY, timeout=30.0)
     MODEL_TO_USE = "gemma2-9b-it"
     PROVIDER_NAME = "Groq Cloud API (Gemma 2 9B)"
 else:
-    client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY, timeout=2.0)
+    client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY, timeout=30.0)
     MODEL_TO_USE = LM_STUDIO_MODEL
     PROVIDER_NAME = "LM Studio Local (Gemma 4 12B QAT)"
 
