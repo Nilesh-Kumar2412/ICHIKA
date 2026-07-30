@@ -8,7 +8,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.141%2B-green.svg)](https://fastapi.tiangolo.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.60%2B-red.svg)](https://streamlit.io/)
 [![Gemma 4](https://img.shields.io/badge/LLM-Gemma%204%2012B-purple.svg)](https://ai.google.dev/gemma)
-[![Tests: Passing](https://img.shields.io/badge/Tests-24%2F24%20Passing-brightgreen.svg)](backend/tests/)
+[![Tests: Passing](https://img.shields.io/badge/Tests-25%2F25%20Passing-brightgreen.svg)](backend/tests/)
 
 ---
 
@@ -117,7 +117,7 @@ streamlit run frontend/app.py --server.port 8501
 
 ## 🧪 Test Suite Execution
 
-Run the complete 24-test suite covering API endpoints, empirical replanning, multi-agent negotiation caps, and parser isolation:
+Run the complete 25-test suite covering API endpoints, empirical replanning, multi-agent negotiation caps, and parser isolation:
 
 ```bash
 python -m pytest backend/tests/ -v
@@ -135,7 +135,7 @@ ICHIKA/
 │   │   ├── planner.py        # Weekly agenda generation agent
 │   │   ├── replanner.py      # Rescheduling & slot reallocation agent
 │   │   └── negotiator.py     # Multi-agent negotiation agent
-│   ├── tests/                # Comprehensive Pytest test suite (24 tests)
+│   ├── tests/                # Comprehensive Pytest test suite (25 tests)
 │   └── requirements.txt      # Backend Python dependencies
 ├── frontend/
 │   ├── app.py                # Streamlit high-contrast UI
