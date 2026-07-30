@@ -605,7 +605,7 @@ with tab_negotiate:
                 except Exception as e:
                     st.error(f"Connection error: {e}")
 
-    if "neg_result" in st.session_state:
+    if st.session_state.get("neg_result") is not None:
         neg = st.session_state.neg_result
         final_slot = neg.get("final_slot")
         rounds = neg.get("rounds", 0)
