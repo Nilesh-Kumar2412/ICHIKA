@@ -514,6 +514,52 @@ async def extract_timetable_endpoint(
         "timetable": structured
     }
 
+def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
+    q_lower = query.lower()
+    timetable = load_student_file("timetable.json", sid) or {}
+    deadlines = load_student_file("deadlines.json", sid) or []
+    events = load_shared_file("events.json") or []
+
+    if "email" in q_lower or "professor" in q_lower or "missed" in q_lower:
+        return (
+            f"**Subject**: Request regarding missed class — Student {sid}\n\n"
+            f"Dear Professor,\n\n"
+            f"I am writing to inform you that due to illness/unavoidable circumstances, "
+            f"I was unable to attend the recent lab/lecture session for student registration {sid}.\n\n"
+            f"I have caught up on the course syllabus topics and would be grateful if you could kindly guide me on any makeup requirements "
+            f"or slot reallocations.\n\n"
+            f"Thank you for your time and understanding.\n\n"
+            f"Sincerely,\nStudent ID: {sid}"
+        )
+    elif "whatsapp" in q_lower or "teammate" in q_lower or "group" in q_lower:
+        return (
+            f"Hey team! 👋\n"
+            f"Proposing a group study session for our project. "
+            f"How does Wednesday 18:00 - 20:00 work for everyone? "
+            f"Let me know your availability so we can finalize the slot!"
+        )
+    elif "agenda" in q_lower or "schedule" in q_lower or "today" in q_lower or "deadline" in q_lower or "mess" in q_lower:
+        courses = timetable.get("courses", [])
+        c_count = len(courses)
+        d_count = len(deadlines)
+        return (
+            f"### 📋 Daily Agenda & Summary for {sid}\n\n"
+            f"- **Enrolled Courses**: {c_count} active VTOP courses\n"
+            f"- **Upcoming Deadlines**: {d_count} pending assignment deadlines\n"
+            f"- **Mess Schedule**: Breakfast (07:30), Lunch (12:30), Snacks (16:30), Dinner (19:30)\n"
+            f"- **Campus Events**: {len(events)} club events scheduled this week\n\n"
+            f"*Check the Weekly Agenda tab for complete day-by-day item breakdowns.*"
+        )
+    else:
+        return (
+            f"Hello! I am ICHIKA, your campus copilot assistant for student **{sid}**.\n\n"
+            f"I can assist you with:\n"
+            f"1. 📅 **Schedule & Agenda**: Viewing your VTOP classes and mess menu\n"
+            f"2. ⚡ **Autonomous Replanning**: Automatic catch-up slots for missed classes\n"
+            f"3. 🤝 **Group Coordination**: Multi-agent negotiation for study sessions\n"
+            f"4. ✉️ **Message Drafting**: Emails to faculty or messages to project teammates"
+        )
+
 # ─── CHAT ENDPOINT (POST) ──────────────────────────────────
 @app.post("/chat")
 async def chat(req: ChatRequest):
@@ -538,17 +584,13 @@ async def chat(req: ChatRequest):
             model=MODEL_TO_USE,
             messages=messages,
             temperature=0.7,
-            timeout=2.0,
+            timeout=15.0,
         )
         ai_text = response.choices[0].message.content
         speak(ai_text)
         return {"response": ai_text, "source": "llm"}
-    except Exception as e:
-        err_str = str(e)
-        fallback_msg = (
-            f"ICHIKA Offline Mode: I am active for {sid}. "
-            f"Schedule generation, replanning, and negotiation remain 100% operational."
-        )
+    except Exception:
+        fallback_msg = generate_smart_chat_fallback(req.text, sid, req.tone)
         return {"response": fallback_msg, "source": "fallback"}
 
 if __name__ == "__main__":
