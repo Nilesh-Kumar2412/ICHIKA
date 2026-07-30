@@ -467,6 +467,8 @@ async def extract_timetable_endpoint(
 
     if file:
         content = await file.read()
+        if len(content) > MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="File size exceeds 5MB limit.")
         tmp_fd, tmp_path = tempfile.mkstemp(suffix=os.path.splitext(file.filename)[1] or ".pdf")
         os.write(tmp_fd, content)
         os.close(tmp_fd)
