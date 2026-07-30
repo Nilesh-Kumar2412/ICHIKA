@@ -297,6 +297,15 @@ def _resolve_student_id(
 @app.get("/plan")
 async def get_plan(student_id: Optional[str] = None, reg_no: Optional[str] = None):
     sid = _resolve_student_id(student_id, reg_no)
+    
+    # Validate student exists
+    valid_students = list_registered_students()
+    if sid not in valid_students:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Student {sid} not found. Available: {valid_students}"
+        )
+    
     timetable = load_student_file("timetable.json", sid)
     deadlines = load_student_file("deadlines.json", sid)
     events    = load_shared_file("events.json")
@@ -308,6 +317,15 @@ async def post_plan(req: Optional[PlanRequest] = None, student_id: Optional[str]
     body_sid = req.student_id if req else None
     body_reg = req.reg_no if req else None
     sid = _resolve_student_id(student_id, reg_no, body_sid, body_reg)
+    
+    # Validate student exists
+    valid_students = list_registered_students()
+    if sid not in valid_students:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Student {sid} not found. Available: {valid_students}"
+        )
+    
     timetable = load_student_file("timetable.json", sid)
     deadlines = load_student_file("deadlines.json", sid)
     events    = load_shared_file("events.json")
@@ -350,10 +368,16 @@ async def start_negotiation(req: NegotiateRequest):
     participants = req.participants or req.teammates or ["26BLC1001", "26BLC1002", "26BLC1003"]
     teammate_calendars = load_shared_file("teammate_calendars.json")
     filtered = {k: v for k, v in teammate_calendars.items() if k in participants}
-    if not filtered:
-        filtered = teammate_calendars
-
-    return run_negotiation(client, MODEL_TO_USE, filtered, time_window=req.time_window)
+    
+    # If user explicitly provided participants but none matched, return error
+    if not filtered and (req.participants or req.teammates):
+        available = list(teammate_calendars.keys())
+        raise HTTPException(
+            status_code=400,
+            detail=f"No matching teammates found. Requested: {participants}. Available: {available}"
+        )
+    
+    return run_negotiation(client, MODEL_TO_USE, filtered or teammate_calendars, time_window=req.time_window)
 
 # ─── TIMETABLE EXTRACT ENDPOINT (POST) ─────────────────────
 @app.post("/timetable/extract")

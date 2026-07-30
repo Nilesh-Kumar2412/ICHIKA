@@ -15,6 +15,7 @@ import re
 import json
 import argparse
 import email
+import sys
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
@@ -383,8 +384,8 @@ def main():
 
     input_path = Path(args.input)
     if not input_path.exists():
-        print(f"Error: Input file not found at {input_path}")
-        return
+        print(f"Error: Input file not found at {input_path}", file=sys.stderr)
+        sys.exit(1)
 
     raw_text = extract_input_text(str(input_path), fmt=args.format)
 
