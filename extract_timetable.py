@@ -16,6 +16,7 @@ import re
 import json
 import argparse
 import email
+import sys
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
