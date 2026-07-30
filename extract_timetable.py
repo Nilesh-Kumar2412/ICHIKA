@@ -16,7 +16,6 @@ import re
 import json
 import argparse
 import email
-import sys
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
@@ -33,10 +32,10 @@ def get_llm_client():
     lm_model = os.getenv("LM_STUDIO_MODEL",    "gemma-4-12b-qat")
 
     if groq_key and groq_key != "your_groq_api_key_here":
-        client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_key)
+        client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_key, timeout=30.0)
         model = "gemma2-9b-it"
     else:
-        client = OpenAI(base_url=lm_base, api_key=lm_key)
+        client = OpenAI(base_url=lm_base, api_key=lm_key, timeout=30.0)
         model = lm_model
 
     return client, model
@@ -344,7 +343,7 @@ RAW TEXT:
                 {"role": "user",   "content": user_prompt},
             ],
             temperature=0.1,
-            timeout=2.0,
+            timeout=15.0,
         )
         raw_output = response.choices[0].message.content
         cleaned = re.sub(r"```[\w]*", "", raw_output).strip()

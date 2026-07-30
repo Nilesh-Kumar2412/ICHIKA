@@ -126,6 +126,8 @@ def get_fallback_plan(timetable, deadlines, events, mess_menu):
                 })
 
         # Deadlines on this day — use 18:00-19:30 study slot to avoid dinner overlap
+        if not isinstance(deadlines, list):
+            deadlines = []
         for dl in deadlines:
             if dl.get("due_day") == day:
                 day_items.append({

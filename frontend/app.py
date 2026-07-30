@@ -30,6 +30,12 @@ if "plan_data" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "replan_data" not in st.session_state:
+    st.session_state.replan_data = None
+
+if "neg_result" not in st.session_state:
+    st.session_state.neg_result = None
+
 # ─────────────────────────────────────────────────────────
 #  HIGH-CONTRAST PRUSSIAN BLUE / GOLD / CHARCOAL STYLING
 # ─────────────────────────────────────────────────────────
@@ -297,7 +303,7 @@ with st.sidebar:
 
     available_students = ["26BEC1185", "26BLC1265"]
     try:
-        res = requests.get(f"{BACKEND_URL}/students", timeout=2)
+        res = requests.get(f"{BACKEND_URL}/students", timeout=5)
         if res.status_code == 200:
             server_students = res.json().get("students", [])
             if server_students:
@@ -561,7 +567,7 @@ with tab_negotiate:
     # Fetch teammate registration numbers dynamically
     teammate_options = ["26BLC1001", "26BLC1002", "26BLC1003"]
     try:
-        data_res = requests.get(f"{BACKEND_URL}/data?student_id={st.session_state['selected_reg_no']}", timeout=2)
+        data_res = requests.get(f"{BACKEND_URL}/data?student_id={st.session_state['selected_reg_no']}", timeout=5)
         if data_res.status_code == 200:
             tcals = data_res.json().get("teammate_calendars", {})
             if tcals:

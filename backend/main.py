@@ -17,13 +17,11 @@ with 100% deterministic fallback engines guaranteeing zero-downtime offline oper
 
 import os
 import json
-import uuid
 import time
 import queue
 import tempfile
 import threading
-from pathlib import Path
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Query, Request
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, Union
@@ -39,7 +37,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from agents.planner import generate_plan
 from agents.replanner import generate_replan
 from agents.negotiator import run_negotiation
-from extract_timetable import extract_input_text, parse_vtop_deterministic, extract_with_llm
+from extract_timetable import parse_vtop_deterministic
 
 load_dotenv()
 
@@ -190,10 +188,23 @@ def load_json(filepath: str) -> Union[dict, list]:
     return {}
 
 def load_student_file(filename: str, reg_no: Optional[str]):
-    return load_json(os.path.join(student_data_dir(reg_no), filename))
+    # Try student-specific dir first, then shared, then root data dir
+    student_path = os.path.join(student_data_dir(reg_no), filename)
+    if os.path.exists(student_path):
+        return load_json(student_path)
+    shared_path = os.path.join(shared_data_dir(), filename)
+    if os.path.exists(shared_path):
+        return load_json(shared_path)
+    root_path = os.path.join(DATA_DIR, filename)
+    if os.path.exists(root_path):
+        return load_json(root_path)
+    return {}
 
-def load_shared_file(filename: str):
-    return load_json(os.path.join(shared_data_dir(), filename))
+def load_shared_file(filename: str, default=None):
+    result = load_json(os.path.join(shared_data_dir(), filename))
+    if not result and default is not None:
+        return default
+    return result
 
 def list_registered_students() -> list[str]:
     students_dir = os.path.join(DATA_DIR, "students")
@@ -206,7 +217,7 @@ def list_registered_students() -> list[str]:
 def build_schedule_context(reg_no: Optional[str]) -> str:
     timetable = load_student_file("timetable.json", reg_no)
     deadlines = load_student_file("deadlines.json", reg_no)
-    events    = load_shared_file("events.json")
+    events    = load_shared_file("events.json", default=[])
     parts = []
     if timetable:
         parts.append(f"WEEKLY TIMETABLE:\n{json.dumps(timetable.get('schedule', {}), indent=2)}")
@@ -268,7 +279,7 @@ async def get_all_data(reg_no: Optional[str] = None, student_id: Optional[str] =
         "reg_no":             sid,
         "timetable":          load_student_file("timetable.json", sid),
         "deadlines":          load_student_file("deadlines.json", sid),
-        "events":             load_shared_file("events.json"),
+        "events":             load_shared_file("events.json", default=[]),
         "mess_menu":          load_shared_file("mess_menu.json"),
         "teammate_calendars": load_shared_file("teammate_calendars.json"),
     }
@@ -365,7 +376,7 @@ async def get_plan(student_id: Optional[str] = None, reg_no: Optional[str] = Non
     if not timetable:
         raise HTTPException(status_code=404, detail=f"No timetable found for student '{sid}'.")
     deadlines = load_student_file("deadlines.json", sid)
-    events    = load_shared_file("events.json")
+    events    = load_shared_file("events.json", default=[])
     mess_menu = load_shared_file("mess_menu.json")
     return generate_plan(client, MODEL_TO_USE, timetable, deadlines, events, mess_menu)
 
@@ -387,7 +398,7 @@ async def post_plan(req: Optional[PlanRequest] = None, student_id: Optional[str]
     if not timetable:
         raise HTTPException(status_code=404, detail=f"No timetable found for student '{sid}'.")
     deadlines = load_student_file("deadlines.json", sid)
-    events    = load_shared_file("events.json")
+    events    = load_shared_file("events.json", default=[])
     mess_menu = load_shared_file("mess_menu.json")
     return generate_plan(client, MODEL_TO_USE, timetable, deadlines, events, mess_menu)
 
@@ -417,7 +428,7 @@ async def run_replan(req: ReplanRequest):
         if not timetable:
             raise HTTPException(status_code=404, detail=f"No timetable found for student '{sid}'.")
         deadlines = load_student_file("deadlines.json", sid)
-        events    = load_shared_file("events.json")
+        events    = load_shared_file("events.json", default=[])
         mess_menu = load_shared_file("mess_menu.json")
         gen_res = generate_plan(client, MODEL_TO_USE, timetable, deadlines, events, mess_menu)
         current_plan = gen_res.get("plan", [])
@@ -518,7 +529,7 @@ def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
     q_lower = query.lower()
     timetable = load_student_file("timetable.json", sid) or {}
     deadlines = load_student_file("deadlines.json", sid) or []
-    events = load_shared_file("events.json") or []
+    events = load_shared_file("events.json", default=[])
 
     if "email" in q_lower or "professor" in q_lower or "missed" in q_lower:
         return (
@@ -564,9 +575,9 @@ def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
 @app.post("/chat")
 async def chat(req: ChatRequest):
     if not req.text.strip():
-        return {"error": "text must not be empty."}
+        raise HTTPException(status_code=400, detail="text must not be empty.")
     if len(req.text) > 2000:
-        return {"error": "text exceeds 2000 character limit."}
+        raise HTTPException(status_code=400, detail="text exceeds 2000 character limit.")
 
     sid = req.student_id or req.reg_no or "26BEC1185"
     tone_instruction  = TONES.get(req.tone, TONES["formal"])
