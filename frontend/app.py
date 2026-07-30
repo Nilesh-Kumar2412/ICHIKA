@@ -461,13 +461,12 @@ def render_schedule_item(item):
 # ─────────────────────────────────────────────────────────
 #  MAIN TABS
 # ─────────────────────────────────────────────────────────
-tab_agenda, tab_replan, tab_negotiate, tab_upload, tab_chat, tab_coding = st.tabs([
+tab_agenda, tab_replan, tab_negotiate, tab_upload, tab_chat = st.tabs([
     "Weekly Agenda",
     "Replanner",
     "Group Negotiator",
     "Data Upload",
     "Assistant Chat",
-    "Comparative Coding",
 ])
 
 # ══════════════════════════════════════════════════════════
@@ -761,84 +760,3 @@ with tab_chat:
         if st.button("Clear Chat History", key="clear_chat"):
             st.session_state.messages = []
             st.rerun()
-
-# ══════════════════════════════════════════════════════════
-#  TAB 6 — COMPARATIVE CODING & BENCHMARKING
-# ══════════════════════════════════════════════════════════
-with tab_coding:
-    st.html("""
-    <div class="page-title">Comparative Coding & Algorithm Benchmarking</div>
-    <div class="page-sub">Compare alternative code implementations for Python, Java, or C++ lab submissions. Analyze asymptotic time/space complexity and algorithmic efficiency scores.</div>
-    """)
-
-    col_cp1, col_cp2 = st.columns([3, 1])
-    with col_cp1:
-        prob_title = st.text_input("Problem / Task Title", value="Searching & Sorting Algorithm Benchmark", key="code_prob_title")
-    with col_cp2:
-        lang_sel = st.selectbox("Programming Language", ["python", "cpp", "java"], key="code_lang")
-
-    col_ca, col_cb = st.columns(2)
-    with col_ca:
-        st.markdown("##### Solution A (Standard Implementation)")
-        default_a = '''def find_target(arr, target):
-    # Linear Search O(N)
-    for i in range(len(arr)):
-        if arr[i] == target:
-            return i
-    return -1'''
-        code_a_in = st.text_area("Code Solution A", value=default_a, height=180, key="code_a_area")
-
-    with col_cb:
-        st.markdown("##### Solution B (Optimized Implementation)")
-        default_b = '''import bisect
-
-def find_target(arr, target):
-    # Binary Search O(log N)
-    idx = bisect.bisect_left(arr, target)
-    if idx < len(arr) and arr[idx] == target:
-        return idx
-    return -1'''
-        code_b_in = st.text_area("Code Solution B", value=default_b, height=180, key="code_b_area")
-
-    if st.button("Compare & Benchmark Solutions", type="primary", width="stretch"):
-        with st.spinner("Analyzing code complexity and benchmarking efficiency..."):
-            try:
-                payload = {
-                    "code_a": code_a_in,
-                    "code_b": code_b_in,
-                    "language": lang_sel,
-                    "problem_title": prob_title
-                }
-                res = requests.post(f"{BACKEND_URL}/compare-code", json=payload, timeout=15)
-                if res.status_code == 200:
-                    st.session_state.code_cmp_result = res.json()
-                else:
-                    st.error(f"Comparison error: {res.text}")
-            except Exception as e:
-                st.error(f"Connection error: {e}")
-
-    if st.session_state.get("code_cmp_result") is not None:
-        cmp_res = st.session_state.code_cmp_result
-        sol_a = cmp_res.get("solution_a", {})
-        sol_b = cmp_res.get("solution_b", {})
-        comp = cmp_res.get("comparison", {})
-
-        st.markdown("---")
-        st.success(f"🏆 Verdict: **{comp.get('winner', 'Optimal Solution')}** — {comp.get('verdict', '')}")
-
-        c_metric1, c_metric2 = st.columns(2)
-        with c_metric1:
-            st.markdown("### Solution A")
-            st.metric("Time Complexity", sol_a.get("time_complexity", "O(N)"))
-            st.metric("Space Complexity", sol_a.get("space_complexity", "O(1)"))
-            st.metric("Efficiency Score", f"{sol_a.get('efficiency_score', 80)} / 100")
-            st.caption(sol_a.get("summary", ""))
-
-        with c_metric2:
-            st.markdown("### Solution B")
-            st.metric("Time Complexity", sol_b.get("time_complexity", "O(log N)"))
-            st.metric("Space Complexity", sol_b.get("space_complexity", "O(1)"))
-            st.metric("Efficiency Score", f"{sol_b.get('efficiency_score', 95)} / 100")
-            st.caption(sol_b.get("summary", ""))
-
-        st.info(f"💡 **VIT Lab Recommendation**: {comp.get('recommendation', '')}")
