@@ -86,7 +86,7 @@ def run_negotiation(
                         {"role": "user", "content": f"Evaluate the proposed study slot: {current_proposed_slot}"}
                     ],
                     temperature=0.2,
-                    timeout=2.0
+                    timeout=15.0
                 )
                 raw_text = response.choices[0].message.content
                 cleaned = re.sub(r"```[\w]*", "", raw_text).strip()

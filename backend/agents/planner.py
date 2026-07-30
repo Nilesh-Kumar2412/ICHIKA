@@ -51,7 +51,7 @@ Generate the complete Monday to Friday agenda.
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
-            timeout=2.0
+            timeout=15.0
         )
         raw_text = response.choices[0].message.content
         # Robust fence stripping: handles ```json, ```JSON, ~~~json, etc.
