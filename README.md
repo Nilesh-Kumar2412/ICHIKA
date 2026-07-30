@@ -56,18 +56,18 @@ It parses complex student timetables (PDFs and MHTML VTOP web exports), integrat
 
 ```mermaid
 graph TD
-    A[Student VTOP PDF / MHTML] -->|CLI / API Upload| B[extract_timetable.py Parser]
-    B --> C[(data/students/<REG_NO>/timetable.json)]
+    A["Student VTOP PDF / MHTML"] -->|CLI / API Upload| B["extract_timetable.py Parser"]
+    B --> C[("data/students/REG_NO/timetable.json")]
     
-    D[Streamlit Frontend App :8501] -->|REST Calls| E[FastAPI Backend Server :8000]
+    D["Streamlit Frontend App :8501"] -->|REST Calls| E["FastAPI Backend Server :8000"]
     
-    E --> F[Planner Agent]
-    E --> G[Replanner Agent]
-    E --> H[Multi-Agent Negotiator]
+    E --> F["Planner Agent"]
+    E --> G["Replanner Agent"]
+    E --> H["Multi-Agent Negotiator"]
     
-    F -->|2.0s Fast Timeout| I[LM Studio / Groq API (Gemma 4)]
-    G -->|Fallback| J[Deterministic Heuristic Engine]
-    H -->|Consensus Protocol| K[Teammate Calendar Schedules]
+    F -->|2.0s Fast Timeout| I["LM Studio / Groq API (Gemma 4)"]
+    G -->|Fallback| J["Deterministic Heuristic Engine"]
+    H -->|Consensus Protocol| K["Teammate Calendar Schedules"]
 ```
 
 ---
