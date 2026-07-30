@@ -1,29 +1,33 @@
-# Environment
-.env
-*.env.local
-
+```
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
-*.egg-info/
-dist/
-build/
 
-# Audio temp files
-*.mp3
-*.mp4
-*.wav
+# Dependencies
+venv/
+.venv/
+.env
+.env.local
+*.env.*
 
-# OS artifacts
-.DS_Store
-Thumbs.db
+# Logs
+*.log
+
+# Coverage
+.coverage
+coverage/
+htmlcov/
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
-# Streamlit
-.streamlit/secrets.toml
+# OS
+.DS_Store
+Thumbs.db
+```

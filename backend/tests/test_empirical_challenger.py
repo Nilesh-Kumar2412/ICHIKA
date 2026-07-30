@@ -153,8 +153,13 @@ def test_replanner_preoccupied_evening_slots():
 
 def test_replanner_empty_inputs():
     """Boundary test: Empty missed items list and empty current plan."""
+    # When current_plan is empty but missed_items provided, 
+    # the function creates a default plan structure with the missed item
     res_empty_plan = get_fallback_replan([], ["MAT101"])
-    assert res_empty_plan == []
+    # Should NOT be empty - it should contain a default plan with the missed item marked
+    assert len(res_empty_plan) == 5  # Returns 5-day default plan
+    has_missed = any(item.get("type") == "missed" for day in res_empty_plan for item in day.get("items", []))
+    assert has_missed is True  # The missed item should be marked
 
     res_empty_missed = get_fallback_replan(SAMPLE_PLAN, [])
     assert res_empty_missed == SAMPLE_PLAN

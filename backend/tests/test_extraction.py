@@ -16,7 +16,10 @@ from extract_timetable import extract_input_text, parse_vtop_deterministic, extr
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 
 def test_cli_help_no_unicode_crash():
-    cmd = [sys.executable, "extract_timetable.py", "--help"]
+    """Test CLI help runs from project root (where extract_timetable.py lives)."""
+    # The script is at /workspace/extract_timetable.py, not in backend/
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    cmd = [sys.executable, os.path.join(project_root, "extract_timetable.py"), "--help"]
     result = subprocess.run(cmd, capture_output=True, text=True)
     assert result.returncode == 0
     assert "--input" in result.stdout
