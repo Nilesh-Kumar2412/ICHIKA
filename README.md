@@ -35,10 +35,9 @@ It parses complex student timetables (PDFs and MHTML VTOP web exports), integrat
 - **Multi-Agent Negotiation Protocol**: Autonomous agents representing each teammate (`26BLC1001`, `26BLC1002`, `26BLC1003`, `26BEC1185`, `26BLC1265`) evaluate proposed study windows against their availability and preferences over up to 3 rounds.
 - **Visible Negotiation Logs**: Real-time, color-coded transaction logs showing each agent accepting, proposing alternatives, and reaching final coordinator consensus.
 
-### 4. 💻 Comparative Coding & Algorithm Evaluator (Tab 6)
-- **Benchmarking Tools**: Compares alternative code implementations for Python, C++, or Java lab submissions.
-- **Asymptotic Complexity**: Evaluates Time Complexity ($O(N)$, $O(N^2)$, $O(N \log N)$, $O(\log N)$) and Space Complexity.
-- **Efficiency Scoring**: Assigns numeric quality scores out of 100 and provides specific VIT lab submission recommendations.
+### 4. 📄 VTOP Data Extraction & Profile Manager
+- **Multi-Format Uploads**: Drag-and-drop registration supporting VTOP PDF files, web MHTML exports, and custom JSON schedules up to 5 MB.
+- **Deterministic Regex Parser**: Maps theory slots (`A1`, `B1`) and lab slot pairs (`L7+L8`, `L25+L26`) to precise day and time ranges.
 
 ### 5. 💬 Campus Assistant Chat
 - **Persona & Tone Control**: Supports `formal`, `casual`, and `concise` assistant personas.
