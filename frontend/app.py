@@ -337,7 +337,7 @@ with st.sidebar:
                     mime = "application/pdf" if new_file.name.endswith(".pdf") else ("message/rfc822" if new_file.name.endswith((".mht", ".mhtml")) else "application/json")
                     files = {"file": (new_file.name, new_file.getvalue(), mime)}
                     data = {"reg_no": new_reg.strip().upper()}
-                    res = requests.post(f"{BACKEND_URL}/upload/timetable", data=data, files=files, timeout=30)
+                    res = requests.post(f"{BACKEND_URL}/upload/timetable", data=data, files=files, timeout=60)
                     if res.status_code == 200:
                         st.success(f"Registered {new_reg.upper()}!")
                         st.session_state["selected_reg_no"] = new_reg.upper()
@@ -471,7 +471,7 @@ with tab_agenda:
     if gen_btn:
         with st.spinner("Fetching schedule data..."):
             try:
-                res = requests.get(f"{BACKEND_URL}/plan?student_id={st.session_state['selected_reg_no']}", timeout=30)
+                res = requests.get(f"{BACKEND_URL}/plan?student_id={st.session_state['selected_reg_no']}", timeout=60)
                 if res.status_code == 200:
                     data = res.json()
                     st.session_state.plan_data = data.get("plan", [])
@@ -522,7 +522,7 @@ with tab_replan:
         else:
             if not st.session_state.plan_data:
                 try:
-                    res = requests.get(f"{BACKEND_URL}/plan?student_id={st.session_state['selected_reg_no']}", timeout=30)
+                    res = requests.get(f"{BACKEND_URL}/plan?student_id={st.session_state['selected_reg_no']}", timeout=60)
                     if res.status_code == 200:
                         st.session_state.plan_data = res.json().get("plan", [])
                 except Exception:
@@ -535,7 +535,7 @@ with tab_replan:
                         "current_plan": st.session_state.plan_data or [],
                         "missed_items": [missed_input]
                     }
-                    res = requests.post(f"{BACKEND_URL}/replan", json=payload, timeout=30)
+                    res = requests.post(f"{BACKEND_URL}/replan", json=payload, timeout=60)
                     if res.status_code == 200:
                         data = res.json()
                         st.session_state.plan_data = data.get("plan", [])
@@ -597,7 +597,7 @@ with tab_negotiate:
                     payload = {"participants": selected_teammates}
                     if time_win_input.strip():
                         payload["time_window"] = time_win_input.strip()
-                    res = requests.post(f"{BACKEND_URL}/negotiate", json=payload, timeout=30)
+                    res = requests.post(f"{BACKEND_URL}/negotiate", json=payload, timeout=60)
                     if res.status_code == 200:
                         st.session_state.neg_result = res.json()
                     else:
@@ -652,7 +652,7 @@ with tab_upload:
                     mime = "application/pdf" if tt_file.name.endswith(".pdf") else ("message/rfc822" if tt_file.name.endswith((".mht", ".mhtml")) else "application/json")
                     files = {"file": (tt_file.name, tt_file.getvalue(), mime)}
                     data = {"reg_no": target_reg.strip()}
-                    res = requests.post(f"{BACKEND_URL}/upload/timetable", data=data, files=files, timeout=30)
+                    res = requests.post(f"{BACKEND_URL}/upload/timetable", data=data, files=files, timeout=60)
                     if res.status_code == 200:
                         st.success(f"Successfully uploaded & parsed data for {target_reg.upper()}")
                         st.session_state["selected_reg_no"] = target_reg.upper()
@@ -726,7 +726,7 @@ with tab_chat:
                             "history": history_payload,
                             "student_id": st.session_state["selected_reg_no"]
                         },
-                        timeout=30
+                        timeout=60
                     )
                     if res.status_code == 200:
                         data = res.json()

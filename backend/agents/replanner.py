@@ -52,7 +52,7 @@ Mark the original missed item(s) with type "missed" and add rescheduled copies a
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
-            timeout=15.0
+            timeout=8.0
         )
         raw_text = response.choices[0].message.content
         cleaned = re.sub(r"```[\w]*", "", raw_text).strip()

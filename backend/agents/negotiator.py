@@ -86,7 +86,7 @@ def run_negotiation(
                         {"role": "user", "content": f"Evaluate the proposed study slot: {current_proposed_slot}"}
                     ],
                     temperature=0.2,
-                    timeout=15.0
+                    timeout=5.0
                 )
                 raw_text = response.choices[0].message.content
                 cleaned = re.sub(r"```[\w]*", "", raw_text).strip()
@@ -128,7 +128,7 @@ def run_negotiation(
                     {"role": "user", "content": f"Round {round_num}: Evaluate teammate responses and decide next action."}
                 ],
                 temperature=0.1,
-                timeout=15.0
+                timeout=5.0
             )
             raw_coord = coord_response.choices[0].message.content
             cleaned_coord = re.sub(r"```[\w]*", "", raw_coord).strip()
