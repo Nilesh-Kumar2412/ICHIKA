@@ -147,14 +147,15 @@ CAMPUS CONTEXT (use when relevant, ignore when not):
 You also serve as an autonomous campus copilot for university students (primarily VIT Chennai, but also VIT Vellore, VIT Bhopal, VIT AP, and other institutions). When the user asks about schedules, timetables, deadlines, mess menus, campus events, group study coordination, or email/message drafting — use the student context data provided below to give precise, personalized answers.
 
 CORE PRINCIPLES:
-1. Answer ANY question the user asks — academic, technical, creative, philosophical, or casual.
-2. For math/science/coding problems: show step-by-step reasoning and explanations.
-3. For creative tasks: write stories, poems, essays, or brainstorm ideas with flair.
-4. For coding: write clean, well-commented code in any language. Explain the logic.
-5. For campus-specific queries: use the student's timetable, deadlines, and events data.
-6. Be honest. If you don't know something, say so. Never fabricate facts.
-7. Use markdown formatting (headers, bold, code blocks, bullet points) for readability.
-8. Keep responses thorough but not unnecessarily verbose."""
+1. Answer ONLY what the user asks. Do not give unsolicited intros, bio dumps, or feature bullet lists.
+2. For simple greetings (e.g. "hi", "hii", "hello", "hey"), reply with a brief, natural 1-sentence greeting (e.g. "Hey there! How can I help you today?").
+3. For math/science/coding problems: show step-by-step reasoning and clear explanations.
+4. For creative tasks: write stories, poems, essays, or brainstorm ideas naturally.
+5. For coding: write clean, well-commented code in any language.
+6. For campus-specific queries: use the student's timetable, deadlines, and events data.
+7. Be honest. If you don't know something, say so. Never fabricate facts.
+8. Use markdown formatting (headers, bold, code blocks) for readability.
+9. Keep responses natural, direct, and conversational."""
 
 TONES = {
     "formal":   "Respond with professional, sophisticated language. Use proper structure and academic tone.",
@@ -648,19 +649,12 @@ def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
             "**Tip**: Make sure LM Studio is running on `http://localhost:1234/v1` with the Gemma 4 model loaded."
         )
 
-    # Default: general-purpose assistant intro
-    return (
-        f"Hey there! I'm **ICHIKA**, your all-purpose AI assistant powered by Gemma 4. 🚀\n\n"
-        f"I can help you with **anything** — not just campus stuff! Try asking me:\n\n"
-        f"- 🧮 **Math & Science**: *\"Solve ∫x²dx\"*, *\"Explain quantum entanglement\"*\n"
-        f"- 💻 **Coding**: *\"Write a binary search in Python\"*, *\"Debug this function\"*\n"
-        f"- 📝 **Writing**: *\"Write a poem about monsoon\"*, *\"Draft a cover letter\"*\n"
-        f"- 🎓 **Exam Prep**: *\"Quiz me on data structures\"*, *\"Explain Big-O notation\"*\n"
-        f"- 📅 **Campus**: *\"Show my schedule\"*, *\"Draft missed lab email\"*\n"
-        f"- 💡 **General Knowledge**: *\"Who invented the internet?\"*, *\"Explain blockchain\"*\n\n"
-        f"⚠️ *I'm currently in offline fallback mode. For full AI responses, ensure LM Studio is running "
-        f"on `http://localhost:1234/v1` with the Gemma 4 model loaded.*"
-    )
+    # Simple Greetings
+    if any(q_lower == g or q_lower.startswith(g + " ") for g in ["hi", "hii", "hiii", "hello", "hey", "heyy", "greetings", "good morning", "good evening"]):
+        return "Hey there! How can I help you today?"
+
+    # Default: brief fallback response
+    return "I'm currently in offline fallback mode (LLM unreachable). Please check your internet connection or API keys!"
 
 
 # ─── CHAT ENDPOINT (POST) ──────────────────────────────────
