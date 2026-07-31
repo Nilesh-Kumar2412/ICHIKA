@@ -17,6 +17,7 @@ Supports: VIT Chennai, VIT Vellore, VIT Bhopal, VIT AP, and any university.
 """
 
 import os
+import re
 import json
 import time
 import queue
@@ -701,7 +702,8 @@ async def chat(req: ChatRequest):
             clean_ai_text = ai_text.strip()
 
         return {"response": clean_ai_text, "source": "llm"}
-    except Exception:
+    except Exception as e:
+        print(f"[CHAT ERROR] LLM Call failed: {e}")
         fallback_msg = generate_smart_chat_fallback(req.text, sid, req.tone)
         return {"response": fallback_msg, "source": "fallback"}
 
