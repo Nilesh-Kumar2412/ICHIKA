@@ -276,6 +276,9 @@ ALLOWED_UPLOAD_FILES = {"timetable.json", "deadlines.json"}
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
 
 def _save_student_file(reg_no: str, filename: str, content: bytes) -> str:
+    clean_reg = re.sub(r'[^A-Z0-9]', '', reg_no.upper().strip())
+    if not clean_reg:
+        clean_reg = "26BEC1185"
     if len(content) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail=f"File too large. Max {MAX_UPLOAD_BYTES // (1024 * 1024)} MB.")
     if filename not in ALLOWED_UPLOAD_FILES:
@@ -285,7 +288,7 @@ def _save_student_file(reg_no: str, filename: str, content: bytes) -> str:
     except Exception:
         raise HTTPException(status_code=422, detail="Invalid JSON. Could not parse uploaded file.")
 
-    out_dir = os.path.join(DATA_DIR, "students", reg_no.upper().strip())
+    out_dir = os.path.join(DATA_DIR, "students", clean_reg)
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, filename)
     with open(out_path, "w", encoding="utf-8") as f:

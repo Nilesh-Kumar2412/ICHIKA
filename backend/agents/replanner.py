@@ -161,7 +161,7 @@ def get_fallback_replan(current_plan: List[Dict[str, Any]], missed_items: Union[
                 for target_day in days_order:
                     if target_day.lower() == matched_day.lower():
                         continue  # Avoid rescheduling back onto the missed day
-                    day_obj = next((d for d in updated_plan if d.get("day") == target_day), None)
+                    day_obj = next((d for d in updated_plan if d.get("day", "").lower() == target_day.lower()), None)
                     if day_obj is None:
                         day_obj = {"day": target_day, "items": []}
                         updated_plan.append(day_obj)
@@ -208,7 +208,7 @@ def get_fallback_replan(current_plan: List[Dict[str, Any]], missed_items: Union[
 
             # Step 2B: Find free slot across ALL days (Monday-Sunday)
             for target_day in days_order:
-                day_obj = next((d for d in updated_plan if d.get("day") == target_day), None)
+                day_obj = next((d for d in updated_plan if d.get("day", "").lower() == target_day.lower()), None)
                 if day_obj is None:
                     day_obj = {"day": target_day, "items": []}
                     updated_plan.append(day_obj)

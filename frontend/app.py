@@ -615,12 +615,12 @@ with tab_negotiate:
     except Exception:
         pass
 
-    col_tm, col_win, col_act3 = st.columns([2, 2, 1])
     with col_tm:
+        default_teammates = [opt for opt in teammate_options if opt in teammate_options]
         selected_teammates = st.multiselect(
             "Select Teammates",
             teammate_options,
-            default=teammate_options
+            default=default_teammates
         )
     with col_win:
         time_win_input = st.text_input("Proposed Window (Optional)", placeholder="e.g. Wednesday 18:00 - 20:00")
