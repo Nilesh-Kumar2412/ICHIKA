@@ -687,7 +687,6 @@ async def chat(req: ChatRequest):
             timeout=30.0,
         )
         ai_text = response.choices[0].message.content
-        speak(ai_text)
         return {"response": ai_text, "source": "llm"}
     except Exception:
         fallback_msg = generate_smart_chat_fallback(req.text, sid, req.tone)
