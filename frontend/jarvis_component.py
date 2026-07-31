@@ -9,11 +9,14 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {{
-            --cyan: #00d4ff;
+            --yellow: #FFD700;
+            --gold: #FFB700;
+            --cyan: #00e5ff;
             --blue: #0088ff;
-            --dark-bg: #0a0a0f;
-            --glow: 0 0 10px var(--cyan), 0 0 20px var(--cyan), 0 0 40px var(--blue);
-            --hud-color: rgba(0, 212, 255, 0.7);
+            --dark-bg: #07070c;
+            --glow: 0 0 15px #FFD700, 0 0 30px #00e5ff, 0 0 50px #FFB700;
+            --hud-color: rgba(255, 215, 0, 0.75);
+            --hud-blue: rgba(0, 229, 255, 0.6);
         }}
         * {{
             box-sizing: border-box;
@@ -23,7 +26,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         }}
         body {{
             background-color: var(--dark-bg);
-            color: var(--cyan);
+            color: var(--yellow);
             font-family: 'Rajdhani', sans-serif;
             height: 100vh;
             width: 100vw;
@@ -54,33 +57,31 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             font-size: 1.2rem;
             letter-spacing: 2px;
             border-bottom: 1px solid var(--hud-color);
-            background: linear-gradient(90deg, rgba(0,212,255,0.1) 0%, rgba(0,0,0,0) 50%, rgba(0,212,255,0.1) 100%);
+            background: linear-gradient(90deg, rgba(255,215,0,0.15) 0%, rgba(0,0,0,0) 50%, rgba(0,229,255,0.15) 100%);
             z-index: 10;
-            text-shadow: 0 0 5px var(--cyan);
+            text-shadow: 0 0 8px var(--yellow);
         }}
-        .status-bar span {{
-            animation: pulse-text 2s infinite;
+        .status-item span {{
+            color: var(--cyan);
         }}
         
-        /* Layout */
-        .main-container {{
+        /* Main Visual Container */
+        .viewport {{
             flex: 1;
-            display: flex;
-            position: relative;
-            margin-top: 60px;
-            margin-bottom: 80px;
-        }}
-        
-        /* Central Arc Reactor */
-        .reactor-container {{
-            position: absolute;
-            top: 40%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 250px; height: 250px;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 5;
+            position: relative;
+        }}
+        
+        /* Arc Reactor Animation */
+        .reactor-container {{
+            position: relative;
+            width: 320px;
+            height: 320px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }}
         .reactor-ring {{
             position: absolute;
@@ -89,26 +90,27 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         }}
         .ring-1 {{
             width: 100%; height: 100%;
-            border-top: 2px solid var(--cyan);
-            border-bottom: 2px solid var(--cyan);
+            border-top: 3px solid var(--yellow);
+            border-bottom: 3px solid var(--yellow);
             animation: rotate-right 10s linear infinite;
-            box-shadow: 0 0 15px var(--cyan) inset;
+            box-shadow: 0 0 20px var(--yellow) inset, 0 0 10px var(--yellow);
         }}
         .ring-2 {{
             width: 85%; height: 85%;
-            border-left: 2px dashed var(--blue);
-            border-right: 2px dashed var(--blue);
+            border-left: 2px dashed var(--cyan);
+            border-right: 2px dashed var(--cyan);
             animation: rotate-left 15s linear infinite;
+            box-shadow: 0 0 15px var(--cyan);
         }}
         .ring-3 {{
             width: 70%; height: 70%;
-            border: 1px solid var(--hud-color);
-            box-shadow: 0 0 20px var(--blue);
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 25px var(--cyan);
             animation: pulse-glow 3s infinite alternate;
         }}
         .reactor-core {{
             width: 50%; height: 50%;
-            background: radial-gradient(circle, #fff 0%, var(--cyan) 40%, var(--blue) 80%, transparent 100%);
+            background: radial-gradient(circle, #ffffff 0%, var(--yellow) 30%, var(--cyan) 70%, var(--blue) 100%);
             border-radius: 50%;
             box-shadow: var(--glow);
             animation: pulse-glow 2s infinite alternate;
