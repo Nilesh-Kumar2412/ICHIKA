@@ -723,11 +723,11 @@ with tab_chat:
         <div class="page-sub">All-purpose AI powered by Gemma · Ask anything — coding, math, writing, campus &amp; more · Student <strong>{html.escape(st.session_state["selected_reg_no"])}</strong></div>
         """)
     with mode_col2:
-        chat_mode = st.radio("Interface Mode", ["Standard Chat", "🎙️ JARVIS Voice Mode"], key="chat_interface_mode", horizontal=True)
+        chat_mode = st.radio("Interface Mode", ["Standard Chat", "🎙️ ICHIKA Voice Activation Mode"], key="chat_interface_mode", horizontal=True)
 
-    if chat_mode == "🎙️ JARVIS Voice Mode":
-        st.markdown("### 🤖 JARVIS Interactive Voice HUD")
-        st.caption("Iron Man-inspired holographic voice interface. Uses Web Speech API for voice input/output & live arc reactor diagnostics.")
+    if chat_mode == "🎙️ ICHIKA Voice Activation Mode":
+        st.markdown("### 🤖 ICHIKA Interactive Voice HUD")
+        st.caption("Advanced holographic voice interface. Uses Web Speech API for smooth voice input/output & real-time arc reactor diagnostics.")
         jarvis_html = get_jarvis_html(BACKEND_URL, st.session_state["selected_reg_no"])
         components.html(jarvis_html, height=720, scrolling=False)
     else:

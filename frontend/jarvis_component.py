@@ -5,7 +5,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICHIKA JARVIS INTERFACE</title>
+    <title>ICHIKA VOICE ACTIVATION INTERFACE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {{
@@ -297,7 +297,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             box-shadow: 0 0 5px var(--cyan);
             border-radius: 4px 4px 0 0;
             height: 5px;
-            transition: height 0.1s ease;
+            transition: height 0.12s cubic-bezier(0.4, 0, 0.2, 1);
         }}
 
         /* Text Fallback */
@@ -395,9 +395,9 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
     <div class="scanlines"></div>
     
     <div class="status-bar">
-        <span>ICHIKA v4.0</span>
-        <span>JARVIS MODE</span>
-        <span>ONLINE</span>
+        <div class="status-item">SYSTEM: <span>ONLINE</span></div>
+        <div class="status-item">IDENTITY: <span>ICHIKA VOICE ACTIVATION</span></div>
+        <div class="status-item">PROTOCOL: <span>GEMMA AI</span></div>
     </div>
 
     <div class="main-container">
@@ -604,7 +604,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 }} else {{
                     clearInterval(typingInterval);
                 }}
-            }}, 30);
+            }}, 15);
         }}
         
         // History Management
