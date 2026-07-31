@@ -46,6 +46,10 @@ from agents.replanner import generate_replan
 from agents.negotiator import run_negotiation
 from extract_timetable import parse_vtop_deterministic
 
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.abspath(os.path.join(backend_dir, ".."))
+load_dotenv(os.path.join(root_dir, ".env"))
+load_dotenv(os.path.join(backend_dir, ".env"))
 load_dotenv()
 
 # ─────────────────────────────────────────────────────────
