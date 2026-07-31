@@ -65,8 +65,8 @@ if GEMINI_API_KEY and GEMINI_API_KEY not in ("", "your_gemini_api_key_here"):
         api_key=GEMINI_API_KEY,
         timeout=45.0,
     )
-    MODEL_TO_USE = "gemma-3-27b-it"
-    PROVIDER_NAME = "Google AI Studio (Gemma 3 27B)"
+    MODEL_TO_USE = "gemma-4-31b-it"
+    PROVIDER_NAME = "Google AI Studio (Gemma 4 31B)"
 elif GROQ_API_KEY and GROQ_API_KEY not in ("", "your_groq_api_key_here"):
     # ─── Tier 2: Groq Cloud (fast inference) ───
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=GROQ_API_KEY, timeout=30.0)

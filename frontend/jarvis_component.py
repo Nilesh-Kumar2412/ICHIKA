@@ -527,11 +527,20 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             statusText.innerText = 'VOICE UNAVAILABLE';
         }}
         
-        // Setup Speech Synthesis
+        // Setup Speech Synthesis — Prioritize Female Voice
         function loadVoices() {{
             const voices = synth.getVoices();
-            // Try to find a deep/robotic/UK voice
-            selectedVoice = voices.find(v => v.name.includes('Google UK English Male') || v.name.includes('Daniel') || v.name.includes('David')) || voices[0];
+            // Search for female voices
+            selectedVoice = voices.find(v => 
+                v.name.includes('Google UK English Female') || 
+                v.name.includes('Google US English') ||
+                v.name.includes('Samantha') || 
+                v.name.includes('Victoria') || 
+                v.name.includes('Zira') || 
+                v.name.includes('Karen') || 
+                v.name.includes('Fiona') ||
+                v.name.toLowerCase().includes('female')
+            ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
         }}
         if (speechSynthesis.onvoiceschanged !== undefined) {{
             speechSynthesis.onvoiceschanged = loadVoices;
@@ -544,7 +553,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             
             const utterance = new SpeechSynthesisUtterance(text);
             if (selectedVoice) utterance.voice = selectedVoice;
-            utterance.pitch = 0.7;
+            utterance.pitch = 1.05;
             utterance.rate = 1.0;
             
             utterance.onstart = () => {{
@@ -640,7 +649,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             textInput.value = '';
             
             try {{
-                const res = await fetch(BACKEND_URL + '/chat', {{
+                const cleanBackend = BACKEND_URL.replace(/\/+$/, '');
+                const res = await fetch(cleanBackend + '/chat', {{
                     method: 'POST',
                     headers: {{ 'Content-Type': 'application/json' }},
                     body: JSON.stringify({{

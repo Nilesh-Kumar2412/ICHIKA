@@ -52,7 +52,7 @@ Mark the original missed item(s) with type "missed" and add rescheduled copies a
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
-            timeout=8.0
+            timeout=15.0
         )
         raw_text = response.choices[0].message.content
         cleaned = re.sub(r"```[\w]*", "", raw_text).strip()
@@ -198,7 +198,7 @@ def get_fallback_replan(current_plan: List[Dict[str, Any]], missed_items: Union[
                     is_match = False
                     if missed_codes and label_codes:
                         is_match = any(code in label_codes for code in missed_codes)
-                    if not is_match:
+                    if not is_match and len(missed_lower) >= 3:
                         is_match = missed_lower in label_lower or label_lower in missed_lower
 
                     if is_match and item.get("type") not in ("meal", "missed"):

@@ -51,7 +51,7 @@ Generate the complete Monday to Friday agenda.
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
-            timeout=8.0
+            timeout=15.0
         )
         raw_text = response.choices[0].message.content
         # Robust fence stripping: handles ```json, ```JSON, ~~~json, etc.
@@ -70,9 +70,9 @@ def get_fallback_plan(timetable, deadlines, events, mess_menu):
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
     plan = []
 
-    schedule = timetable.get("schedule", {})
-    menu = mess_menu.get("menu", {})
-    timings = mess_menu.get("timings", {})
+    schedule = timetable.get("schedule", {}) if isinstance(timetable, dict) else {}
+    menu = mess_menu.get("menu", {}) if isinstance(mess_menu, dict) else {}
+    timings = mess_menu.get("timings", {}) if isinstance(mess_menu, dict) else {}
 
     breakfast_time = timings.get("breakfast", "07:30 - 09:00")
     lunch_time     = timings.get("lunch",     "12:30 - 14:00")
@@ -92,12 +92,16 @@ def get_fallback_plan(timetable, deadlines, events, mess_menu):
 
         # Classes (already roughly time-sorted in JSON)
         for cls in schedule.get(day, []):
-            day_items.append({
-                "time": cls["time"],
-                "type": "class",
-                "label": f"{cls['course']} @ {cls['venue']}",
-                "priority": "High"
-            })
+            if isinstance(cls, dict):
+                c_time = cls.get("time", "08:00 - 08:50")
+                c_course = cls.get("course", "Class")
+                c_venue = cls.get("venue", "TBD")
+                day_items.append({
+                    "time": c_time,
+                    "type": "class",
+                    "label": f"{c_course} @ {c_venue}",
+                    "priority": "High"
+                })
 
         # Lunch
         day_items.append({
