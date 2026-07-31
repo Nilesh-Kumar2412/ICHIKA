@@ -446,6 +446,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         <div class="text-input-container">
             <input type="text" id="text-input" placeholder="MANUAL OVERRIDE: TYPE COMMAND HERE..." autocomplete="off">
             <button id="send-btn">EXECUTE</button>
+            <button id="stop-btn" title="Stop speech synthesis and voice input">🛑 ABORT</button>
         </div>
     </div>
 
@@ -679,6 +680,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             }}
         }}
         
+        const stopBtn = document.getElementById('stop-btn');
+
         // Event Listeners
         micBtn.addEventListener('click', () => {{
             if (!recognition) return;
@@ -701,6 +704,16 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             if (e.key === 'Enter') {{
                 processUserInput(textInput.value);
             }}
+        }});
+
+        stopBtn.addEventListener('click', () => {{
+            if (synth.speaking) synth.cancel();
+            if (recognition && isListening) recognition.stop();
+            clearInterval(typingInterval);
+            stopWaveformAnimation();
+            isProcessing = false;
+            updateMicUI('idle');
+            typeText('SYSTEM OVERRIDE: INTERRUPTED', true);
         }});
     </script>
 </body>
