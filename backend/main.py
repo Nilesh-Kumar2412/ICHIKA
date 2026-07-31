@@ -672,9 +672,14 @@ async def chat(req: ChatRequest):
         raise HTTPException(status_code=400, detail="text exceeds 2000 character limit.")
 
     sid = req.student_id or req.reg_no or "26BEC1185"
-    tone_instruction  = TONES.get(req.tone, TONES["formal"])
-    schedule_context  = build_schedule_context(sid)
-    system_content    = f"{SYSTEM_PROMPT_BASE}\n\n{tone_instruction}{schedule_context}"
+    tone_instruction = TONES.get(req.tone, TONES["formal"])
+    
+    # Selective context: only attach heavy schedule context if query is campus-related
+    q_lower = req.text.lower()
+    campus_keywords = ["schedule", "timetable", "class", "deadline", "mess", "menu", "today", "agenda", "event", "professor", "vtop", "lab", "assignment", "exam", "course"]
+    schedule_context = build_schedule_context(sid) if any(k in q_lower for k in campus_keywords) else ""
+    
+    system_content = f"{SYSTEM_PROMPT_BASE}\n\n{tone_instruction}{schedule_context}"
 
     messages = [{"role": "system", "content": system_content}]
     for msg in (req.history or [])[-20:]:
@@ -689,8 +694,15 @@ async def chat(req: ChatRequest):
             temperature=0.7,
             timeout=30.0,
         )
-        ai_text = response.choices[0].message.content
-        return {"response": ai_text, "source": "llm"}
+        ai_text = response.choices[0].message.content or ""
+        
+        # Strip internal thinking/reasoning tags (<thought>...</thought> or <think>...</think>)
+        clean_ai_text = re.sub(r'<thought>.*?</thought>', '', ai_text, flags=re.DOTALL)
+        clean_ai_text = re.sub(r'<think>.*?</think>', '', clean_ai_text, flags=re.DOTALL).strip()
+        if not clean_ai_text:
+            clean_ai_text = ai_text.strip()
+
+        return {"response": clean_ai_text, "source": "llm"}
     except Exception:
         fallback_msg = generate_smart_chat_fallback(req.text, sid, req.tone)
         return {"response": fallback_msg, "source": "fallback"}

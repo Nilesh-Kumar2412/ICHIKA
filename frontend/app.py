@@ -614,7 +614,7 @@ with tab_negotiate:
                 teammate_options = list(tcals.keys())
     except Exception:
         pass
-
+    col_tm, col_win, col_act3 = st.columns([2, 2, 1])
     with col_tm:
         default_teammates = [opt for opt in teammate_options if opt in teammate_options]
         selected_teammates = st.multiselect(
