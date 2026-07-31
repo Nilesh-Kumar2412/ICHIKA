@@ -649,7 +649,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             textInput.value = '';
             
             try {{
-                const cleanBackend = BACKEND_URL.replace(/\/+$/, '');
+                const cleanBackend = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
                 const res = await fetch(cleanBackend + '/chat', {{
                     method: 'POST',
                     headers: {{ 'Content-Type': 'application/json' }},
