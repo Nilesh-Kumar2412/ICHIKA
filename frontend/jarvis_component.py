@@ -663,7 +663,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 
                 const data = await res.json();
                 let reply = data.response || 'I am unable to process that request at this time.';
-                reply = reply.replace(/<thought>[\s\S]*?<\/thought>/gi, '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+                reply = reply.replace(/<thought>[^]*?<\/thought>/gi, '').replace(/<think>[^]*?<\/think>/gi, '').trim();
                 if (!reply) reply = 'System ready.';
                 
                 addToHistory('AI', reply);
