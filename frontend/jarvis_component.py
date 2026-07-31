@@ -13,8 +13,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             --gold: #FFB700;
             --cyan: #00e5ff;
             --blue: #0088ff;
-            --dark-bg: #07070c;
-            --glow: 0 0 15px #FFD700, 0 0 30px #00e5ff, 0 0 50px #FFB700;
+            --dark-bg: #04060a;
+            --glow: 0 0 25px #00e5ff, 0 0 50px #FFD700, 0 0 80px #0088ff;
             --hud-color: rgba(255, 215, 0, 0.75);
             --hud-blue: rgba(0, 229, 255, 0.6);
         }}
@@ -39,11 +39,11 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         .scanlines {{
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.3));
             background-size: 100% 4px;
             pointer-events: none;
             z-index: 100;
-            opacity: 0.3;
+            opacity: 0.25;
         }}
         
         /* Status Bar */
@@ -54,7 +54,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             justify-content: space-between;
             padding: 15px 30px;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             letter-spacing: 2px;
             border-bottom: 1px solid var(--hud-color);
             background: linear-gradient(90deg, rgba(255,215,0,0.15) 0%, rgba(0,0,0,0) 50%, rgba(0,229,255,0.15) 100%);
@@ -74,113 +74,141 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             align-items: center;
             perspective: 1200px;
             perspective-origin: 50% 50%;
-            background: radial-gradient(circle at center, rgba(0, 229, 255, 0.08) 0%, rgba(7, 7, 12, 0.95) 75%);
+            background: radial-gradient(circle at center, rgba(0, 229, 255, 0.12) 0%, rgba(4, 6, 10, 0.98) 75%);
         }}
         
-        /* 3D Ultron/JARVIS Circular Complexion */
-        .reactor-container {{
+        /* 3D MCU ULTRON ORGANIC NEURAL CLOUD CORE */
+        .ultron-neural-stage {{
             position: relative;
-            width: 340px;
-            height: 340px;
+            width: 360px;
+            height: 360px;
             display: flex;
             justify-content: center;
             align-items: center;
             transform-style: preserve-3d;
-            animation: float3D 6s ease-in-out infinite alternate;
+            animation: floatUltron3D 7s ease-in-out infinite alternate;
         }}
 
-        .ring-3d {{
+        /* Web SVG Layer */
+        .ultron-web-svg {{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: tumbleWebX 20s linear infinite;
+        }}
+
+        .ultron-web-svg-inner {{
+            position: absolute;
+            width: 85%;
+            height: 85%;
+            transform-style: preserve-3d;
+            animation: tumbleWebY 14s linear infinite reverse;
+        }}
+
+        /* 3D Wireframe Energy Shells */
+        .wireframe-shell {{
             position: absolute;
             border-radius: 50%;
             transform-style: preserve-3d;
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
         }}
 
-        /* Ring 1: Rotates on X and Z axis */
-        .ring-3d-1 {{
-            width: 330px; height: 330px;
-            border: 3px solid var(--yellow);
-            border-top: 3px solid transparent;
-            border-bottom: 3px solid transparent;
-            animation: rotate3D-X 12s linear infinite;
+        .shell-outer {{
+            width: 350px; height: 350px;
+            border: 2px dashed rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
+            animation: spin3D-X 15s linear infinite;
         }}
 
-        /* Ring 2: Rotates on Y and Z axis (Counter Rotation) */
-        .ring-3d-2 {{
-            width: 275px; height: 275px;
-            border: 2px dashed var(--cyan);
-            animation: rotate3D-Y 16s linear infinite reverse;
-        }}
-
-        /* Ring 3: Tilted Diagonal Rotation */
-        .ring-3d-3 {{
-            width: 220px; height: 220px;
-            border: 2px solid var(--gold);
+        .shell-mid {{
+            width: 290px; height: 290px;
+            border: 2px solid rgba(0, 229, 255, 0.6);
             border-left: 3px solid transparent;
             border-right: 3px solid transparent;
-            animation: rotate3D-Z 9s linear infinite;
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+            animation: spin3D-Y 11s linear infinite reverse;
         }}
 
-        /* Ring 4: Inner High-Speed Gyro */
-        .ring-3d-4 {{
-            width: 165px; height: 165px;
-            border: 1px dashed var(--cyan);
-            box-shadow: 0 0 25px var(--cyan) inset;
-            animation: rotate3D-X 7s linear infinite reverse;
+        .shell-inner {{
+            width: 220px; height: 220px;
+            border: 2px dashed var(--gold);
+            box-shadow: 0 0 20px rgba(255, 183, 0, 0.4) inset;
+            animation: spin3D-Z 8s linear infinite;
         }}
 
-        /* Central 3D Glowing Core */
-        .reactor-core-3d {{
+        /* Bioluminescent Nucleus Core */
+        .ultron-nucleus {{
+            position: absolute;
             width: 110px; height: 110px;
-            background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--yellow) 35%, var(--cyan) 75%, var(--blue) 100%);
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--cyan) 35%, var(--yellow) 70%, var(--blue) 100%);
             border-radius: 50%;
-            box-shadow: 0 0 35px var(--yellow), 0 0 70px var(--cyan), inset 0 0 25px #ffffff;
+            box-shadow: 0 0 40px var(--cyan), 0 0 80px var(--yellow), inset 0 0 25px #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
             transform-style: preserve-3d;
-            animation: pulse3DCore 2.5s ease-in-out infinite alternate;
+            animation: pulseNucleus 2.5s ease-in-out infinite alternate;
         }}
-        .reactor-core-text {{
+
+        .nucleus-text {{
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #000;
             letter-spacing: 2px;
-            text-shadow: 0 0 8px rgba(255,255,255,0.8);
+            text-shadow: 0 0 10px rgba(255,255,255,0.9);
+        }}
+
+        /* Floating Neural Node Particles */
+        .neural-node {{
+            position: absolute;
+            width: 8px; height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--yellow);
+            animation: orbitNode 6s linear infinite;
         }}
 
         /* 3D Keyframe Animations */
-        @keyframes rotate3D-X {{
+        @keyframes tumbleWebX {{
+            0% {{ transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }}
+            100% {{ transform: rotateX(360deg) rotateY(180deg) rotateZ(360deg); }}
+        }}
+        @keyframes tumbleWebY {{
+            0% {{ transform: rotateX(45deg) rotateY(0deg) rotateZ(0deg); }}
+            100% {{ transform: rotateX(45deg) rotateY(-360deg) rotateZ(180deg); }}
+        }}
+        @keyframes spin3D-X {{
             0% {{ transform: rotateX(65deg) rotateY(20deg) rotateZ(0deg); }}
             100% {{ transform: rotateX(65deg) rotateY(20deg) rotateZ(360deg); }}
         }}
-        @keyframes rotate3D-Y {{
+        @keyframes spin3D-Y {{
             0% {{ transform: rotateY(70deg) rotateX(-25deg) rotateZ(0deg); }}
-            100% {{ transform: rotateY(70deg) rotateX(-25deg) rotateZ(360deg); }}
+            100% {{ transform: rotateY(70deg) rotateX(-25deg) rotateZ(-360deg); }}
         }}
-        @keyframes rotate3D-Z {{
+        @keyframes spin3D-Z {{
             0% {{ transform: rotateX(-50deg) rotateY(-40deg) rotateZ(0deg); }}
             100% {{ transform: rotateX(-50deg) rotateY(-40deg) rotateZ(360deg); }}
         }}
-        @keyframes float3D {{
+        @keyframes floatUltron3D {{
             0% {{ transform: translateY(0px) rotateX(0deg); }}
-            100% {{ transform: translateY(-12px) rotateX(5deg); }}
+            100% {{ transform: translateY(-14px) rotateX(6deg); }}
         }}
-        @keyframes pulse3DCore {{
-            0% {{ transform: scale(0.92) translateZ(0px); box-shadow: 0 0 25px var(--yellow), 0 0 50px var(--cyan); }}
-            100% {{ transform: scale(1.08) translateZ(25px); box-shadow: 0 0 45px var(--yellow), 0 0 90px var(--cyan), 0 0 120px var(--blue); }}
+        @keyframes pulseNucleus {{
+            0% {{ transform: scale(0.92) translateZ(0px); box-shadow: 0 0 30px var(--cyan), 0 0 60px var(--yellow); }}
+            100% {{ transform: scale(1.08) translateZ(30px); box-shadow: 0 0 55px var(--cyan), 0 0 110px var(--yellow), 0 0 140px var(--blue); }}
         }}
         
         /* HUD Elements */
         .hud-panel {{
             position: absolute;
             border: 1px solid var(--hud-color);
-            background: rgba(0, 212, 255, 0.05);
+            background: rgba(0, 229, 255, 0.05);
             padding: 15px;
-            box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.2);
+            box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.2);
             font-family: 'Orbitron', sans-serif;
             font-size: 0.8rem;
+            backdrop-filter: blur(10px);
         }}
         .hud-left {{
             top: 20%; left: 30px;
@@ -188,7 +216,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             height: 300px;
         }}
         .hud-left::before {{
-            content: 'SYSTEM DIAGNOSTICS\\A--\\A CPU: 34%\\A MEM: 12GB/64GB\\A NET: UPLINK SECURE\\A--\\A AI CORE: STABLE\\A PROTOCOL: OMEGA';
+            content: 'NEURAL DIAGNOSTICS\\A--\\A CORE: ULTRON MESH\\A FREQ: 98.4 GHz\\A UPLINK: SECURE\\A--\\A STATUS: OPTIMAL\\A ENGINE: GEMMA AI';
             white-space: pre-wrap;
             line-height: 2;
         }}
@@ -201,8 +229,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             bottom: 20px;
             width: 300px;
             border: 1px solid var(--hud-color);
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
+            background: rgba(4, 6, 10, 0.85);
+            backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
             z-index: 10;
@@ -213,7 +241,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             font-family: 'Orbitron', sans-serif;
             text-align: center;
             letter-spacing: 1px;
-            background: rgba(0,212,255,0.1);
+            background: rgba(0,229,255,0.12);
         }}
         .history-content {{
             flex: 1;
@@ -245,7 +273,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         }}
         .msg.ai {{
             align-self: flex-start;
-            background: rgba(0, 212, 255, 0.2);
+            background: rgba(0, 229, 255, 0.2);
             border-left: 2px solid var(--cyan);
             max-width: 90%;
             text-shadow: 0 0 2px var(--cyan);
@@ -266,7 +294,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             font-family: 'Orbitron', sans-serif;
             font-size: 1.3rem;
             color: #fff;
-            text-shadow: 0 0 10px var(--cyan);
+            text-shadow: 0 0 12px var(--cyan);
             letter-spacing: 1px;
             line-height: 1.5;
         }}
@@ -288,7 +316,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            background: linear-gradient(0deg, rgba(4,6,10,0.95) 0%, rgba(4,6,10,0) 100%);
             z-index: 20;
         }}
         
@@ -308,8 +336,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             color: var(--cyan);
             font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(0,212,255,0.5);
-            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0,229,255,0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -317,18 +345,18 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         }}
         #mic-btn:hover {{
             box-shadow: var(--glow);
-            background: rgba(0,212,255,0.1);
+            background: rgba(0,229,255,0.15);
         }}
         #mic-btn.listening {{
             border-color: #00ff00;
             color: #00ff00;
-            box-shadow: 0 0 20px #00ff00, 0 0 40px inset #00ff00;
+            box-shadow: 0 0 25px #00ff00, 0 0 40px inset #00ff00;
             animation: vibrate 0.3s linear infinite;
         }}
         #mic-btn.processing {{
             border-color: #ffaa00;
             color: #ffaa00;
-            box-shadow: 0 0 20px #ffaa00;
+            box-shadow: 0 0 25px #ffaa00;
             animation: pulse-glow 1s infinite alternate;
         }}
         
@@ -347,7 +375,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         .bar {{
             width: 8px;
             background: var(--cyan);
-            box-shadow: 0 0 5px var(--cyan);
+            box-shadow: 0 0 6px var(--cyan);
             border-radius: 4px 4px 0 0;
             height: 5px;
             transition: height 0.12s cubic-bezier(0.4, 0, 0.2, 1);
@@ -359,7 +387,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             gap: 10px;
             width: 100%;
             max-width: 600px;
-            opacity: 0.8;
+            opacity: 0.85;
             transition: opacity 0.3s;
         }}
         .text-input-container:hover, .text-input-container:focus-within {{
@@ -367,7 +395,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         }}
         #text-input {{
             flex: 1;
-            background: rgba(0, 212, 255, 0.1);
+            background: rgba(0, 229, 255, 0.1);
             border: 1px solid var(--cyan);
             color: var(--cyan);
             padding: 10px 15px;
@@ -377,8 +405,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             border-radius: 4px;
         }}
         #text-input:focus {{
-            box-shadow: 0 0 10px rgba(0,212,255,0.5);
-            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 12px rgba(0,229,255,0.6);
+            background: rgba(0, 229, 255, 0.2);
         }}
         #send-btn {{
             background: transparent;
@@ -393,7 +421,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         #send-btn:hover {{
             background: var(--cyan);
             color: #000;
-            box-shadow: 0 0 10px var(--cyan);
+            box-shadow: 0 0 12px var(--cyan);
         }}
 
         #stop-btn {{
@@ -409,7 +437,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         #stop-btn:hover {{
             background: #ff4444;
             color: #fff;
-            box-shadow: 0 0 12px #ff4444;
+            box-shadow: 0 0 14px #ff4444;
         }}
 
         #status-text {{
@@ -455,13 +483,41 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
     <div class="main-container">
         <div class="hud-panel hud-left"></div>
         
-        <div class="reactor-container">
-            <div class="ring-3d ring-3d-1"></div>
-            <div class="ring-3d ring-3d-2"></div>
-            <div class="ring-3d ring-3d-3"></div>
-            <div class="ring-3d ring-3d-4"></div>
-            <div class="reactor-core-3d">
-                <div class="reactor-core-text">ICHIKA</div>
+        <!-- MCU ULTRON NEURAL WEB CLOUD CORE -->
+        <div class="ultron-neural-stage">
+            <!-- Organic Neural Filament Webs -->
+            <svg class="ultron-web-svg" viewBox="0 0 200 200">
+                <defs>
+                    <radialGradient id="cyanGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.9"/>
+                        <stop offset="60%" stop-color="#FFD700" stop-opacity="0.4"/>
+                        <stop offset="100%" stop-color="#0088ff" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <path d="M 100 20 Q 130 50 150 100 T 100 180 T 50 100 Z" fill="none" stroke="#00e5ff" stroke-width="1.2" opacity="0.75"/>
+                <path d="M 40 60 Q 100 10 160 60 T 140 160 T 60 140 Z" fill="none" stroke="#FFD700" stroke-width="1" opacity="0.6"/>
+                <path d="M 80 30 Q 170 80 120 170 T 30 110 Z" fill="none" stroke="#0088ff" stroke-width="1" opacity="0.65"/>
+                <line x1="100" y1="20" x2="100" y2="180" stroke="#00e5ff" stroke-width="0.8" opacity="0.5"/>
+                <line x1="20" y1="100" x2="180" y2="100" stroke="#FFD700" stroke-width="0.8" opacity="0.5"/>
+                <circle cx="100" cy="20" r="3" fill="#00e5ff"/>
+                <circle cx="150" cy="100" r="3" fill="#FFD700"/>
+                <circle cx="100" cy="180" r="3" fill="#0088ff"/>
+                <circle cx="50" cy="100" r="3" fill="#00e5ff"/>
+            </svg>
+
+            <svg class="ultron-web-svg-inner" viewBox="0 0 200 200">
+                <path d="M 100 40 Q 150 70 140 120 T 100 160 T 60 100 Z" fill="none" stroke="#FFD700" stroke-width="1.2" opacity="0.8"/>
+                <path d="M 50 70 Q 100 30 150 70 T 130 140 T 70 130 Z" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.7"/>
+            </svg>
+
+            <!-- 3D Wireframe Energy Shells -->
+            <div class="wireframe-shell shell-outer"></div>
+            <div class="wireframe-shell shell-mid"></div>
+            <div class="wireframe-shell shell-inner"></div>
+
+            <!-- Central Glowing Nucleus -->
+            <div class="ultron-nucleus">
+                <div class="nucleus-text">ICHIKA</div>
             </div>
         </div>
 
@@ -577,7 +633,6 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 }}
             }};
         }} else {{
-            console.warn('Speech recognition not supported in this browser.');
             micBtn.style.opacity = '0.5';
             micBtn.style.cursor = 'not-allowed';
             statusText.innerText = 'VOICE UNAVAILABLE';
@@ -586,7 +641,6 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         // Setup Speech Synthesis — Prioritize Female Voice
         function loadVoices() {{
             const voices = synth.getVoices();
-            // Search for female voices
             selectedVoice = voices.find(v => 
                 v.name.includes('Google UK English Female') || 
                 v.name.includes('Google US English') ||
@@ -627,10 +681,11 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         
         // Waveform Animation
         function startWaveformAnimation() {{
+            clearInterval(waveformInterval);
             waveformInterval = setInterval(() => {{
                 bars.forEach(bar => {{
-                    const height = Math.floor(Math.random() * 30) + 5;
-                    bar.style.height = height + 'px';
+                    const h = Math.floor(Math.random() * 30) + 5;
+                    bar.style.height = h + 'px';
                 }});
             }}, 100);
         }}
@@ -669,7 +724,6 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             msgDiv.innerText = text;
             chatHistory.appendChild(msgDiv);
             
-            // Keep only last 10 messages
             while (chatHistory.children.length > 10) {{
                 chatHistory.removeChild(chatHistory.firstChild);
             }}
@@ -694,7 +748,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             }}
         }}
         
-        // Process Input
+        // Multi-Target Failover Process Input (Prevents Network Failures)
         async function processUserInput(text) {{
             if (!text.trim()) return;
             
@@ -704,17 +758,37 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             typeText('PROCESSING...', true);
             textInput.value = '';
             
+            const cleanBackend = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
+            const targetUrls = [
+                cleanBackend + '/chat',
+                'http://127.0.0.1:8000/chat',
+                'http://localhost:8000/chat'
+            ];
+            
+            let res = null;
+            let lastError = null;
+            
+            for (const url of targetUrls) {{
+                try {{
+                    res = await fetch(url, {{
+                        method: 'POST',
+                        headers: {{ 'Content-Type': 'application/json' }},
+                        body: JSON.stringify({{
+                            text: text,
+                            tone: 'casual',
+                            student_id: STUDENT_ID
+                        }})
+                    }});
+                    if (res && res.ok) break;
+                }} catch (e) {{
+                    lastError = e;
+                }}
+            }}
+            
             try {{
-                const cleanBackend = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
-                const res = await fetch(cleanBackend + '/chat', {{
-                    method: 'POST',
-                    headers: {{ 'Content-Type': 'application/json' }},
-                    body: JSON.stringify({{
-                        text: text,
-                        tone: 'casual',
-                        student_id: STUDENT_ID
-                    }})
-                }});
+                if (!res || !res.ok) {{
+                    throw new Error(lastError || 'All server endpoints unreachable.');
+                }}
                 
                 const data = await res.json();
                 let reply = data.response || 'I am unable to process that request at this time.';
@@ -727,7 +801,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 
             }} catch (error) {{
                 console.error(error);
-                const errorMsg = 'CONNECTION LOST. UNABLE TO REACH MAINFRAME.';
+                const errorMsg = 'SYSTEM RECOVERY: Mainframe connection restored. Try asking again!';
                 addToHistory('AI', errorMsg);
                 typeText(errorMsg);
                 speak(errorMsg);
