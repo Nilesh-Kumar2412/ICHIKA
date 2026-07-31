@@ -114,18 +114,29 @@ def speak(text: str):
         _audio_queue.put(text)
 
 # ─────────────────────────────────────────────────────────
-#  SYSTEM PROMPTS & TONES
+#  CHAT SYSTEM PROMPT & PERSONA CONFIGURATION
 # ─────────────────────────────────────────────────────────
-SYSTEM_PROMPT_BASE = """You are ICHIKA — an autonomous campus planning assistant for VIT Chennai students.
-Your primary directive is Truth and Logic. You do not prioritise pleasing the user.
-If the user is wrong, correct them. If a plan is illogical, point out the flaws clearly.
-Communication Style: Firm, composed, steady, helpful. Never insulting.
-Keep responses concise and actionable — you are a campus productivity tool, not a conversationalist."""
+SYSTEM_PROMPT_BASE = """You are ICHIKA — a highly capable, general-purpose AI assistant powered by Gemma.
+
+You are intelligent, knowledgeable, and helpful across ALL domains — science, math, programming, history, literature, philosophy, creative writing, career advice, exam preparation, general knowledge, reasoning puzzles, and more. You think step-by-step when solving complex problems.
+
+CAMPUS CONTEXT (use when relevant, ignore when not):
+You also serve as an autonomous campus copilot for VIT Chennai students. When the user asks about schedules, timetables, deadlines, mess menus, campus events, group study coordination, or email/message drafting — use the student context data provided below to give precise, personalized answers.
+
+CORE PRINCIPLES:
+1. Answer ANY question the user asks — academic, technical, creative, philosophical, or casual.
+2. For math/science/coding problems: show step-by-step reasoning and explanations.
+3. For creative tasks: write stories, poems, essays, or brainstorm ideas with flair.
+4. For coding: write clean, well-commented code in any language. Explain the logic.
+5. For campus-specific queries: use the student's timetable, deadlines, and events data.
+6. Be honest. If you don't know something, say so. Never fabricate facts.
+7. Use markdown formatting (headers, bold, code blocks, bullet points) for readability.
+8. Keep responses thorough but not unnecessarily verbose."""
 
 TONES = {
-    "formal":   "Use sophisticated vocabulary. Maintain strict professional boundaries.",
-    "casual":   "Use relaxed language. Keep the logic but make it feel like talking to a friend.",
-    "concise":  "Use minimal words. Be extremely direct and clear.",
+    "formal":   "Respond with professional, sophisticated language. Use proper structure and academic tone.",
+    "casual":   "Respond like a friendly, smart peer. Keep the depth but make it conversational and approachable.",
+    "concise":  "Be extremely direct and brief. Minimum words, maximum clarity. Skip pleasantries.",
 }
 
 # ─────────────────────────────────────────────────────────
@@ -537,7 +548,8 @@ def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
     deadlines = load_student_file("deadlines.json", sid) or []
     events = load_shared_file("events.json", default=[])
 
-    if "email" in q_lower or "professor" in q_lower or "missed" in q_lower:
+    # --- Campus-specific fallbacks ---
+    if "email" in q_lower or "professor" in q_lower or ("missed" in q_lower and ("class" in q_lower or "lab" in q_lower)):
         return (
             f"**Subject**: Request regarding missed class — Student {sid}\n\n"
             f"Dear Professor,\n\n"
@@ -548,14 +560,14 @@ def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
             f"Thank you for your time and understanding.\n\n"
             f"Sincerely,\nStudent ID: {sid}"
         )
-    elif "whatsapp" in q_lower or "teammate" in q_lower or "group" in q_lower:
+    elif "whatsapp" in q_lower or ("teammate" in q_lower and "message" in q_lower):
         return (
             f"Hey team! 👋\n"
             f"Proposing a group study session for our project. "
             f"How does Wednesday 18:00 - 20:00 work for everyone? "
             f"Let me know your availability so we can finalize the slot!"
         )
-    elif "agenda" in q_lower or "schedule" in q_lower or "today" in q_lower or "deadline" in q_lower or "mess" in q_lower:
+    elif any(k in q_lower for k in ["agenda", "schedule", "timetable", "deadline", "mess", "class today"]):
         courses = timetable.get("courses", [])
         c_count = len(courses)
         d_count = len(deadlines)
@@ -567,15 +579,58 @@ def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
             f"- **Campus Events**: {len(events)} club events scheduled this week\n\n"
             f"*Check the Weekly Agenda tab for complete day-by-day item breakdowns.*"
         )
-    else:
+
+    # --- General-purpose fallback: attempt to give a useful answer ---
+    # Math & calculations
+    if any(k in q_lower for k in ["calculate", "solve", "integral", "derivative", "equation", "math", "formula"]):
         return (
-            f"Hello! I am ICHIKA, your campus copilot assistant for student **{sid}**.\n\n"
-            f"I can assist you with:\n"
-            f"1. 📅 **Schedule & Agenda**: Viewing your VTOP classes and mess menu\n"
-            f"2. ⚡ **Autonomous Replanning**: Automatic catch-up slots for missed classes\n"
-            f"3. 🤝 **Group Coordination**: Multi-agent negotiation for study sessions\n"
-            f"4. ✉️ **Message Drafting**: Emails to faculty or messages to project teammates"
+            "I'd love to help with this math problem! However, I'm currently running in **offline fallback mode** "
+            "(the Gemma LLM server is unreachable right now). Once the LM Studio server is back online, "
+            "I'll be able to solve equations, integrals, derivatives, and more step-by-step.\n\n"
+            "**Tip**: Make sure LM Studio is running on `http://localhost:1234/v1` with the Gemma 4 model loaded."
         )
+
+    # Coding
+    if any(k in q_lower for k in ["code", "program", "function", "algorithm", "python", "java", "debug", "error", "bug"]):
+        return (
+            "I can write and debug code in Python, Java, C++, JavaScript, and more! "
+            "However, I'm currently in **offline fallback mode** (the Gemma LLM is unreachable). "
+            "Once the LM Studio server is back online, I'll generate clean, commented code for you.\n\n"
+            "**Tip**: Make sure LM Studio is running on `http://localhost:1234/v1` with the Gemma 4 model loaded."
+        )
+
+    # General knowledge / explain
+    if any(k in q_lower for k in ["explain", "what is", "who is", "how does", "why", "define", "tell me about", "history"]):
+        return (
+            "Great question! I'm a general-purpose AI and can explain concepts across science, history, philosophy, "
+            "technology, and more. However, I'm currently in **offline fallback mode** (the Gemma LLM is unreachable). "
+            "Once the LM Studio server is back online, I'll give you a thorough, well-structured explanation.\n\n"
+            "**Tip**: Make sure LM Studio is running on `http://localhost:1234/v1` with the Gemma 4 model loaded."
+        )
+
+    # Creative writing
+    if any(k in q_lower for k in ["write", "story", "poem", "essay", "creative", "letter", "blog"]):
+        return (
+            "I'd be happy to write that for you! I can craft stories, poems, essays, blog posts, and more. "
+            "However, I'm currently in **offline fallback mode** (the Gemma LLM is unreachable). "
+            "Once the LM Studio server is back online, I'll create something great.\n\n"
+            "**Tip**: Make sure LM Studio is running on `http://localhost:1234/v1` with the Gemma 4 model loaded."
+        )
+
+    # Default: general-purpose assistant intro
+    return (
+        f"Hey there! I'm **ICHIKA**, your all-purpose AI assistant powered by Gemma 4. 🚀\n\n"
+        f"I can help you with **anything** — not just campus stuff! Try asking me:\n\n"
+        f"- 🧮 **Math & Science**: *\"Solve ∫x²dx\"*, *\"Explain quantum entanglement\"*\n"
+        f"- 💻 **Coding**: *\"Write a binary search in Python\"*, *\"Debug this function\"*\n"
+        f"- 📝 **Writing**: *\"Write a poem about monsoon\"*, *\"Draft a cover letter\"*\n"
+        f"- 🎓 **Exam Prep**: *\"Quiz me on data structures\"*, *\"Explain Big-O notation\"*\n"
+        f"- 📅 **Campus**: *\"Show my schedule\"*, *\"Draft missed lab email\"*\n"
+        f"- 💡 **General Knowledge**: *\"Who invented the internet?\"*, *\"Explain blockchain\"*\n\n"
+        f"⚠️ *I'm currently in offline fallback mode. For full AI responses, ensure LM Studio is running "
+        f"on `http://localhost:1234/v1` with the Gemma 4 model loaded.*"
+    )
+
 
 # ─── CHAT ENDPOINT (POST) ──────────────────────────────────
 @app.post("/chat")
@@ -601,7 +656,7 @@ async def chat(req: ChatRequest):
             model=MODEL_TO_USE,
             messages=messages,
             temperature=0.7,
-            timeout=15.0,
+            timeout=30.0,
         )
         ai_text = response.choices[0].message.content
         speak(ai_text)

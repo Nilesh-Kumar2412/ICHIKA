@@ -692,24 +692,35 @@ python extract_timetable.py --input "data/VIT Chennai - VTOP (1) (1).mht" --stud
 # ══════════════════════════════════════════════════════════
 with tab_chat:
     st.html(f"""
-    <div class="page-title">Campus Assistant Chat</div>
-    <div class="page-sub">Query schedule details or request assistance for <strong>{html.escape(st.session_state["selected_reg_no"])}</strong>.</div>
+    <div class="page-title">ICHIKA AI Assistant</div>
+    <div class="page-sub">All-purpose AI powered by Gemma 4 · Ask anything — coding, math, writing, campus &amp; more · Student <strong>{html.escape(st.session_state["selected_reg_no"])}</strong></div>
     """)
 
     tone_sel = st.selectbox("Persona Tone", ["formal", "casual", "concise"])
 
-    st.markdown("##### Quick Demo Prompts")
+    st.markdown("##### Quick Prompts")
     c_btn1, c_btn2, c_btn3 = st.columns(3)
     preset_prompt = None
     with c_btn1:
-        if st.button("Draft Missed Lab Email", width="stretch"):
-            preset_prompt = "Draft a formal email to my professor explaining I missed BACSE101 lab due to illness and requesting a make-up slot."
+        if st.button("🧮 Solve a Math Problem", width="stretch"):
+            preset_prompt = "Solve the integral of x² · e^x dx step by step and explain each integration-by-parts iteration."
     with c_btn2:
-        if st.button("Draft Teammate Message", width="stretch"):
-            preset_prompt = "Draft a WhatsApp message to my project teammates proposing a study session on Wednesday 18:00 - 20:00."
+        if st.button("💻 Write Python Code", width="stretch"):
+            preset_prompt = "Write a Python function that implements binary search on a sorted list. Include docstring, type hints, and edge-case handling."
     with c_btn3:
-        if st.button("Summarize Daily Agenda", width="stretch"):
+        if st.button("📅 Summarize My Day", width="stretch"):
             preset_prompt = "Summarize my core class schedule, mess menu, and upcoming deadlines for today."
+
+    c_btn4, c_btn5, c_btn6 = st.columns(3)
+    with c_btn4:
+        if st.button("✉️ Draft Missed Lab Email", width="stretch"):
+            preset_prompt = "Draft a formal email to my professor explaining I missed BACSE101 lab due to illness and requesting a make-up slot."
+    with c_btn5:
+        if st.button("📝 Write a Short Essay", width="stretch"):
+            preset_prompt = "Write a 200-word essay on the impact of artificial intelligence on higher education."
+    with c_btn6:
+        if st.button("💡 Explain a Concept", width="stretch"):
+            preset_prompt = "Explain the difference between TCP and UDP protocols in simple terms with real-world analogies."
 
     st.markdown("---")
 
@@ -719,7 +730,7 @@ with tab_chat:
         with st.chat_message(role):
             st.markdown(content)
 
-    chat_input_val = st.chat_input("Ask a question about your timetable or deadlines...")
+    chat_input_val = st.chat_input("Ask me anything — math, code, science, writing, campus schedule...")
     chat_prompt = preset_prompt or chat_input_val
     if chat_prompt:
         st.session_state.messages.append({"role": "user", "content": chat_prompt})
