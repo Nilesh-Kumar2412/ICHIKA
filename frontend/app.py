@@ -1,9 +1,11 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import requests
 import json
 import html
 import socket
 import io
+from jarvis_component import get_jarvis_html
 try:
     import qrcode
     from PIL import Image
@@ -12,14 +14,20 @@ except ImportError:
     QR_AVAILABLE = False
 
 st.set_page_config(
-    page_title="VIT Chennai — Campus Copilot (Ichika)",
+    page_title="Campus Copilot — ICHIKA AI Assistant",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Session state initialization
+# Resolve backend URL: Streamlit Cloud secrets > env > localhost fallback
+_default_backend = "http://localhost:8000"
+try:
+    _default_backend = st.secrets.get("BACKEND_URL", _default_backend)
+except Exception:
+    pass
+
 if "backend_url" not in st.session_state:
-    st.session_state["backend_url"] = "http://localhost:8000"
+    st.session_state["backend_url"] = _default_backend
 
 if "selected_reg_no" not in st.session_state:
     st.session_state["selected_reg_no"] = "26BEC1185"
@@ -38,6 +46,12 @@ if "neg_result" not in st.session_state:
 
 if "code_cmp_result" not in st.session_state:
     st.session_state.code_cmp_result = None
+
+if "university" not in st.session_state:
+    st.session_state.university = "VIT Chennai"
+
+if "jarvis_mode" not in st.session_state:
+    st.session_state.jarvis_mode = False
 
 # ─────────────────────────────────────────────────────────
 #  HIGH-CONTRAST PRUSSIAN BLUE / GOLD / CHARCOAL STYLING
@@ -298,9 +312,20 @@ div[data-baseweb="select"] {
 #  SIDEBAR
 # ─────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### VIT CHENNAI")
+    uni = st.session_state.university
+    st.markdown(f"### {uni.upper()}")
     st.markdown("Academic Portal · Campus Copilot")
     st.markdown("---")
+
+    st.markdown("##### University")
+    uni_choice = st.selectbox(
+        "Select University",
+        ["VIT Chennai", "VIT Vellore", "VIT Bhopal", "VIT AP", "Other"],
+        index=["VIT Chennai", "VIT Vellore", "VIT Bhopal", "VIT AP", "Other"].index(st.session_state.university) if st.session_state.university in ["VIT Chennai", "VIT Vellore", "VIT Bhopal", "VIT AP", "Other"] else 0,
+    )
+    if uni_choice != st.session_state.university:
+        st.session_state.university = uni_choice
+        st.rerun()
 
     BACKEND_URL = st.text_input("API Base Endpoint", key="backend_url")
 
@@ -365,11 +390,11 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("##### System Status")
-    st.markdown("""
+    st.markdown(f"""
     • Status: Active & Operational<br>
-    • Model: <strong>Gemma 4 12B QAT</strong><br>
-    • Provider: <strong>LM Studio Local / Groq Cloud API</strong><br>
-    • Backend Port: 8000
+    • Model: <strong>{html.escape(active_model_name)}</strong><br>
+    • Provider: <strong>{html.escape(active_provider)}</strong><br>
+    • University: <strong>{html.escape(st.session_state.university)}</strong>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
@@ -397,17 +422,17 @@ with st.sidebar:
 # ─────────────────────────────────────────────────────────
 #  HERO BANNER (MATCHING THUMBNAIL REFERENCE LAYOUT)
 # ─────────────────────────────────────────────────────────
-st.html("""
+st.html(f"""
 <div class="ichika-hero-banner">
-  <div class="ichika-hero-kicker">AUTONOMOUS AGENTS • CODE WITH GEMMA</div>
+  <div class="ichika-hero-kicker">AUTONOMOUS AGENTS • POWERED BY GEMMA</div>
   <div class="ichika-hero-title">Project Ichika</div>
   <div class="ichika-hero-sub">
-    Plans your week. Replans on the fly. Negotiates with your teammates — an autonomous agent running fully on-device, no cloud in sight.
+    Plans your week. Replans on the fly. Negotiates with your teammates — an AI-powered autonomous campus copilot with JARVIS voice mode.
   </div>
   <div class="ichika-pill-container">
-    <span class="ichika-pill-badge">Gemma 4 12B QAT</span>
-    <span class="ichika-pill-badge">Fully on-device</span>
-    <span class="ichika-pill-badge">Ichika Moderators</span>
+    <span class="ichika-pill-badge">Gemma AI</span>
+    <span class="ichika-pill-badge">{html.escape(st.session_state.university)}</span>
+    <span class="ichika-pill-badge">JARVIS Voice Mode</span>
   </div>
 </div>
 """)
@@ -418,8 +443,8 @@ st.html("""
 st.html(f"""
 <div class="vtop-navbar">
   <div>
-    <div class="vtop-title">VELLORE INSTITUTE OF TECHNOLOGY</div>
-    <div class="vtop-sub">Chennai Campus · Campus Copilot Assistant</div>
+    <div class="vtop-title">{html.escape(st.session_state.university.upper())}</div>
+    <div class="vtop-sub">Campus Copilot · AI Assistant</div>
   </div>
   <div class="vtop-user-pill">
     Active Student: <strong>{html.escape(st.session_state['selected_reg_no'])}</strong>
@@ -466,7 +491,7 @@ tab_agenda, tab_replan, tab_negotiate, tab_upload, tab_chat = st.tabs([
     "Replanner",
     "Group Negotiator",
     "Data Upload",
-    "Assistant Chat",
+    "🌐 Assistant Chat",
 ])
 
 # ══════════════════════════════════════════════════════════
@@ -691,83 +716,93 @@ python extract_timetable.py --input "data/VIT Chennai - VTOP (1) (1).mht" --stud
 #  TAB 5 — ASSISTANT CHAT
 # ══════════════════════════════════════════════════════════
 with tab_chat:
-    st.html(f"""
-    <div class="page-title">ICHIKA AI Assistant</div>
-    <div class="page-sub">All-purpose AI powered by Gemma 4 · Ask anything — coding, math, writing, campus &amp; more · Student <strong>{html.escape(st.session_state["selected_reg_no"])}</strong></div>
-    """)
+    mode_col1, mode_col2 = st.columns([3, 1])
+    with mode_col1:
+        st.html(f"""
+        <div class="page-title">ICHIKA AI Assistant</div>
+        <div class="page-sub">All-purpose AI powered by Gemma · Ask anything — coding, math, writing, campus &amp; more · Student <strong>{html.escape(st.session_state["selected_reg_no"])}</strong></div>
+        """)
+    with mode_col2:
+        chat_mode = st.radio("Interface Mode", ["Standard Chat", "🎙️ JARVIS Voice Mode"], key="chat_interface_mode", horizontal=True)
 
-    tone_sel = st.selectbox("Persona Tone", ["formal", "casual", "concise"])
+    if chat_mode == "🎙️ JARVIS Voice Mode":
+        st.markdown("### 🤖 JARVIS Interactive Voice HUD")
+        st.caption("Iron Man-inspired holographic voice interface. Uses Web Speech API for voice input/output & live arc reactor diagnostics.")
+        jarvis_html = get_jarvis_html(BACKEND_URL, st.session_state["selected_reg_no"])
+        components.html(jarvis_html, height=720, scrolling=False)
+    else:
+        tone_sel = st.selectbox("Persona Tone", ["formal", "casual", "concise"])
 
-    st.markdown("##### Quick Prompts")
-    c_btn1, c_btn2, c_btn3 = st.columns(3)
-    preset_prompt = None
-    with c_btn1:
-        if st.button("🧮 Solve a Math Problem", width="stretch"):
-            preset_prompt = "Solve the integral of x² · e^x dx step by step and explain each integration-by-parts iteration."
-    with c_btn2:
-        if st.button("💻 Write Python Code", width="stretch"):
-            preset_prompt = "Write a Python function that implements binary search on a sorted list. Include docstring, type hints, and edge-case handling."
-    with c_btn3:
-        if st.button("📅 Summarize My Day", width="stretch"):
-            preset_prompt = "Summarize my core class schedule, mess menu, and upcoming deadlines for today."
+        st.markdown("##### Quick Prompts")
+        c_btn1, c_btn2, c_btn3 = st.columns(3)
+        preset_prompt = None
+        with c_btn1:
+            if st.button("🧮 Solve a Math Problem", width="stretch"):
+                preset_prompt = "Solve the integral of x² · e^x dx step by step and explain each integration-by-parts iteration."
+        with c_btn2:
+            if st.button("💻 Write Python Code", width="stretch"):
+                preset_prompt = "Write a Python function that implements binary search on a sorted list. Include docstring, type hints, and edge-case handling."
+        with c_btn3:
+            if st.button("📅 Summarize My Day", width="stretch"):
+                preset_prompt = "Summarize my core class schedule, mess menu, and upcoming deadlines for today."
 
-    c_btn4, c_btn5, c_btn6 = st.columns(3)
-    with c_btn4:
-        if st.button("✉️ Draft Missed Lab Email", width="stretch"):
-            preset_prompt = "Draft a formal email to my professor explaining I missed BACSE101 lab due to illness and requesting a make-up slot."
-    with c_btn5:
-        if st.button("📝 Write a Short Essay", width="stretch"):
-            preset_prompt = "Write a 200-word essay on the impact of artificial intelligence on higher education."
-    with c_btn6:
-        if st.button("💡 Explain a Concept", width="stretch"):
-            preset_prompt = "Explain the difference between TCP and UDP protocols in simple terms with real-world analogies."
+        c_btn4, c_btn5, c_btn6 = st.columns(3)
+        with c_btn4:
+            if st.button("✉️ Draft Missed Lab Email", width="stretch"):
+                preset_prompt = "Draft a formal email to my professor explaining I missed BACSE101 lab due to illness and requesting a make-up slot."
+        with c_btn5:
+            if st.button("📝 Write a Short Essay", width="stretch"):
+                preset_prompt = "Write a 200-word essay on the impact of artificial intelligence on higher education."
+        with c_btn6:
+            if st.button("💡 Explain a Concept", width="stretch"):
+                preset_prompt = "Explain the difference between TCP and UDP protocols in simple terms with real-world analogies."
 
-    st.markdown("---")
+        st.markdown("---")
 
-    for msg in st.session_state.messages:
-        role = msg.get("role", "user")
-        content = msg.get("content", "")
-        with st.chat_message(role):
-            st.markdown(content)
+        for msg in st.session_state.messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            with st.chat_message(role):
+                st.markdown(content)
 
-    chat_input_val = st.chat_input("Ask me anything — math, code, science, writing, campus schedule...")
-    chat_prompt = preset_prompt or chat_input_val
-    if chat_prompt:
-        st.session_state.messages.append({"role": "user", "content": chat_prompt})
-        with st.chat_message("user"):
-            st.markdown(chat_prompt)
+        chat_input_val = st.chat_input("Ask me anything — math, code, science, writing, campus schedule...")
+        chat_prompt = preset_prompt or chat_input_val
+        if chat_prompt:
+            st.session_state.messages.append({"role": "user", "content": chat_prompt})
+            with st.chat_message("user"):
+                st.markdown(chat_prompt)
 
-        with st.chat_message("assistant"):
-            with st.spinner("Processing request..."):
-                try:
-                    history_payload = [
-                        {"role": m["role"], "content": m["content"]}
-                        for m in st.session_state.messages[:-1]
-                    ]
-                    res = requests.post(
-                        f"{BACKEND_URL}/chat",
-                        json={
-                            "text": chat_prompt,
-                            "tone": tone_sel,
-                            "history": history_payload,
-                            "student_id": st.session_state["selected_reg_no"]
-                        },
-                        timeout=60
-                    )
-                    if res.status_code == 200:
-                        data = res.json()
-                        if "error" in data:
-                            st.error(f"Error: {data['error']}")
+            with st.chat_message("assistant"):
+                with st.spinner("Processing request..."):
+                    try:
+                        history_payload = [
+                            {"role": m["role"], "content": m["content"]}
+                            for m in st.session_state.messages[:-1]
+                        ]
+                        res = requests.post(
+                            f"{BACKEND_URL}/chat",
+                            json={
+                                "text": chat_prompt,
+                                "tone": tone_sel,
+                                "history": history_payload,
+                                "student_id": st.session_state["selected_reg_no"]
+                            },
+                            timeout=60
+                        )
+                        if res.status_code == 200:
+                            data = res.json()
+                            if "error" in data:
+                                st.error(f"Error: {data['error']}")
+                            else:
+                                ai_resp = data.get("response", "")
+                                st.markdown(ai_resp)
+                                st.session_state.messages.append({"role": "assistant", "content": ai_resp})
                         else:
-                            ai_resp = data.get("response", "")
-                            st.markdown(ai_resp)
-                            st.session_state.messages.append({"role": "assistant", "content": ai_resp})
-                    else:
-                        st.error(f"Backend error: {res.text}")
-                except Exception as e:
-                    st.error(f"Connection error: {e}")
+                            st.error(f"Backend error: {res.text}")
+                    except Exception as e:
+                        st.error(f"Connection error: {e}")
 
-    if st.session_state.messages:
-        if st.button("Clear Chat History", key="clear_chat"):
-            st.session_state.messages = []
-            st.rerun()
+        if st.session_state.messages:
+            if st.button("Clear Chat History", key="clear_chat"):
+                st.session_state.messages = []
+                st.rerun()

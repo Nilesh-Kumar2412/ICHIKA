@@ -3,15 +3,16 @@
 PROJECT ICHIKA — CAMPUS COPILOT BACKEND API SERVER
 ===============================================================================
 
-FastAPI REST Application serving autonomous agents for VIT Chennai students:
+FastAPI REST Application serving autonomous AI agents for university students:
 1. Academic Planner Agent (/plan)
 2. Autonomous Schedule Replanner Agent (/replan)
 3. Multi-Agent Group Study Coordinator (/negotiate)
 4. VTOP Timetable Extraction Engine (/timetable/extract)
-5. Campus Assistant Chat Endpoint (/chat)
+5. All-Purpose AI Assistant Chat (/chat) with JARVIS voice mode
 
-Powered by Gemma 4 (12B QAT) via LM Studio Local Server / Groq Cloud API,
-with 100% deterministic fallback engines guaranteeing zero-downtime offline operation.
+Powered by Gemma via Google AI Studio (cloud) / Groq / LM Studio (local),
+with 100% deterministic fallback engines guaranteeing zero-downtime operation.
+Supports: VIT Chennai, VIT Vellore, VIT Bhopal, VIT AP, and any university.
 ===============================================================================
 """
 
@@ -26,9 +27,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, Union
 from openai import OpenAI
-from gtts import gTTS
-import pygame
 from dotenv import load_dotenv
+
+# Optional TTS dependencies (not available on cloud deployment)
+try:
+    from gtts import gTTS
+    import pygame
+    _TTS_AVAILABLE = True
+except ImportError:
+    _TTS_AVAILABLE = False
 
 import sys
 sys.path.append(os.path.dirname(__file__))
@@ -42,21 +49,34 @@ from extract_timetable import parse_vtop_deterministic
 load_dotenv()
 
 # ─────────────────────────────────────────────────────────
-#  CONFIGURATION
+#  CONFIGURATION — 3-tier LLM Provider Fallback
+#  Priority: Google AI Studio (Gemini API) > Groq > LM Studio Local
 # ─────────────────────────────────────────────────────────
+GEMINI_API_KEY     = os.getenv("GEMINI_API_KEY", "")
+GROQ_API_KEY       = os.getenv("GROQ_API_KEY", "")
 LM_STUDIO_BASE_URL = os.getenv("LM_STUDIO_BASE_URL", "http://localhost:1234/v1")
 LM_STUDIO_API_KEY  = os.getenv("LM_STUDIO_API_KEY",  "lm-studio")
 LM_STUDIO_MODEL    = os.getenv("LM_STUDIO_MODEL",    "gemma-4-12b-qat")
-GROQ_API_KEY       = os.getenv("GROQ_API_KEY")
 
-if GROQ_API_KEY and GROQ_API_KEY != "your_groq_api_key_here":
+if GEMINI_API_KEY and GEMINI_API_KEY not in ("", "your_gemini_api_key_here"):
+    # ─── Tier 1: Google AI Studio (free Gemma via OpenAI-compatible endpoint) ───
+    client = OpenAI(
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        api_key=GEMINI_API_KEY,
+        timeout=45.0,
+    )
+    MODEL_TO_USE = "gemma-3-27b-it"
+    PROVIDER_NAME = "Google AI Studio (Gemma 3 27B)"
+elif GROQ_API_KEY and GROQ_API_KEY not in ("", "your_groq_api_key_here"):
+    # ─── Tier 2: Groq Cloud (fast inference) ───
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=GROQ_API_KEY, timeout=30.0)
     MODEL_TO_USE = "gemma2-9b-it"
     PROVIDER_NAME = "Groq Cloud API (Gemma 2 9B)"
 else:
+    # ─── Tier 3: LM Studio Local (requires laptop running) ───
     client = OpenAI(base_url=LM_STUDIO_BASE_URL, api_key=LM_STUDIO_API_KEY, timeout=30.0)
     MODEL_TO_USE = LM_STUDIO_MODEL
-    PROVIDER_NAME = "LM Studio Local (Gemma 4 12B QAT)"
+    PROVIDER_NAME = f"LM Studio Local ({LM_STUDIO_MODEL})"
 
 # ─────────────────────────────────────────────────────────
 #  FASTAPI APP
@@ -102,12 +122,15 @@ def _audio_worker():
                 pass
         _audio_queue.task_done()
 
-try:
-    pygame.mixer.init()
-    AUDIO_ENABLED = True
-    threading.Thread(target=_audio_worker, daemon=True).start()
-except Exception as e:
-    print(f"Pygame audio init skipped: {e}")
+if _TTS_AVAILABLE:
+    try:
+        pygame.mixer.init()
+        AUDIO_ENABLED = True
+        threading.Thread(target=_audio_worker, daemon=True).start()
+    except Exception as e:
+        print(f"Pygame audio init skipped (normal on cloud): {e}")
+else:
+    print("TTS dependencies not installed — voice handled client-side via JARVIS mode.")
 
 def speak(text: str):
     if AUDIO_ENABLED:
@@ -121,7 +144,7 @@ SYSTEM_PROMPT_BASE = """You are ICHIKA — a highly capable, general-purpose AI 
 You are intelligent, knowledgeable, and helpful across ALL domains — science, math, programming, history, literature, philosophy, creative writing, career advice, exam preparation, general knowledge, reasoning puzzles, and more. You think step-by-step when solving complex problems.
 
 CAMPUS CONTEXT (use when relevant, ignore when not):
-You also serve as an autonomous campus copilot for VIT Chennai students. When the user asks about schedules, timetables, deadlines, mess menus, campus events, group study coordination, or email/message drafting — use the student context data provided below to give precise, personalized answers.
+You also serve as an autonomous campus copilot for university students (primarily VIT Chennai, but also VIT Vellore, VIT Bhopal, VIT AP, and other institutions). When the user asks about schedules, timetables, deadlines, mess menus, campus events, group study coordination, or email/message drafting — use the student context data provided below to give precise, personalized answers.
 
 CORE PRINCIPLES:
 1. Answer ANY question the user asks — academic, technical, creative, philosophical, or casual.
@@ -282,6 +305,11 @@ async def root():
         "audio":    AUDIO_ENABLED,
         "students": list_registered_students(),
     }
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for deployment monitoring."""
+    return {"status": "healthy", "provider": PROVIDER_NAME, "model": MODEL_TO_USE}
 
 @app.get("/students")
 async def get_students():
