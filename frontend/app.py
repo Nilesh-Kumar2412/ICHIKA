@@ -427,12 +427,12 @@ st.html(f"""
   <div class="ichika-hero-kicker">AUTONOMOUS AGENTS • POWERED BY GEMMA</div>
   <div class="ichika-hero-title">Project Ichika</div>
   <div class="ichika-hero-sub">
-    Plans your week. Replans on the fly. Negotiates with your teammates — an AI-powered autonomous campus copilot with JARVIS voice mode.
+    Plans your week. Replans on the fly. Negotiates with your teammates — an AI-powered autonomous campus copilot with ICHIKA Voice Activation.
   </div>
   <div class="ichika-pill-container">
     <span class="ichika-pill-badge">Gemma AI</span>
     <span class="ichika-pill-badge">{html.escape(st.session_state.university)}</span>
-    <span class="ichika-pill-badge">JARVIS Voice Mode</span>
+    <span class="ichika-pill-badge">ICHIKA Voice Mode</span>
   </div>
 </div>
 """)

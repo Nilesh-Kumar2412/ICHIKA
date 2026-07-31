@@ -65,58 +65,111 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             color: var(--cyan);
         }}
         
-        /* Main Visual Container */
-        .viewport {{
+        /* Main Visual Container & 3D Stage */
+        .main-container {{
             flex: 1;
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            perspective: 1200px;
+            perspective-origin: 50% 50%;
+            background: radial-gradient(circle at center, rgba(0, 229, 255, 0.08) 0%, rgba(7, 7, 12, 0.95) 75%);
         }}
         
-        /* Arc Reactor Animation */
+        /* 3D Ultron/JARVIS Circular Complexion */
         .reactor-container {{
             position: relative;
-            width: 320px;
-            height: 320px;
+            width: 340px;
+            height: 340px;
             display: flex;
             justify-content: center;
             align-items: center;
+            transform-style: preserve-3d;
+            animation: float3D 6s ease-in-out infinite alternate;
         }}
-        .reactor-ring {{
+
+        .ring-3d {{
             position: absolute;
             border-radius: 50%;
-            border: 2px solid transparent;
+            transform-style: preserve-3d;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
         }}
-        .ring-1 {{
-            width: 100%; height: 100%;
-            border-top: 3px solid var(--yellow);
-            border-bottom: 3px solid var(--yellow);
-            animation: rotate-right 10s linear infinite;
-            box-shadow: 0 0 20px var(--yellow) inset, 0 0 10px var(--yellow);
+
+        /* Ring 1: Rotates on X and Z axis */
+        .ring-3d-1 {{
+            width: 330px; height: 330px;
+            border: 3px solid var(--yellow);
+            border-top: 3px solid transparent;
+            border-bottom: 3px solid transparent;
+            animation: rotate3D-X 12s linear infinite;
         }}
-        .ring-2 {{
-            width: 85%; height: 85%;
-            border-left: 2px dashed var(--cyan);
-            border-right: 2px dashed var(--cyan);
-            animation: rotate-left 15s linear infinite;
-            box-shadow: 0 0 15px var(--cyan);
+
+        /* Ring 2: Rotates on Y and Z axis (Counter Rotation) */
+        .ring-3d-2 {{
+            width: 275px; height: 275px;
+            border: 2px dashed var(--cyan);
+            animation: rotate3D-Y 16s linear infinite reverse;
         }}
-        .ring-3 {{
-            width: 70%; height: 70%;
+
+        /* Ring 3: Tilted Diagonal Rotation */
+        .ring-3d-3 {{
+            width: 220px; height: 220px;
             border: 2px solid var(--gold);
-            box-shadow: 0 0 25px var(--cyan);
-            animation: pulse-glow 3s infinite alternate;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+            animation: rotate3D-Z 9s linear infinite;
         }}
-        .reactor-core {{
-            width: 50%; height: 50%;
-            background: radial-gradient(circle, #ffffff 0%, var(--yellow) 30%, var(--cyan) 70%, var(--blue) 100%);
+
+        /* Ring 4: Inner High-Speed Gyro */
+        .ring-3d-4 {{
+            width: 165px; height: 165px;
+            border: 1px dashed var(--cyan);
+            box-shadow: 0 0 25px var(--cyan) inset;
+            animation: rotate3D-X 7s linear infinite reverse;
+        }}
+
+        /* Central 3D Glowing Core */
+        .reactor-core-3d {{
+            width: 110px; height: 110px;
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, var(--yellow) 35%, var(--cyan) 75%, var(--blue) 100%);
             border-radius: 50%;
-            box-shadow: var(--glow);
-            animation: pulse-glow 2s infinite alternate;
+            box-shadow: 0 0 35px var(--yellow), 0 0 70px var(--cyan), inset 0 0 25px #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
+            transform-style: preserve-3d;
+            animation: pulse3DCore 2.5s ease-in-out infinite alternate;
+        }}
+        .reactor-core-text {{
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: #000;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(255,255,255,0.8);
+        }}
+
+        /* 3D Keyframe Animations */
+        @keyframes rotate3D-X {{
+            0% {{ transform: rotateX(65deg) rotateY(20deg) rotateZ(0deg); }}
+            100% {{ transform: rotateX(65deg) rotateY(20deg) rotateZ(360deg); }}
+        }}
+        @keyframes rotate3D-Y {{
+            0% {{ transform: rotateY(70deg) rotateX(-25deg) rotateZ(0deg); }}
+            100% {{ transform: rotateY(70deg) rotateX(-25deg) rotateZ(360deg); }}
+        }}
+        @keyframes rotate3D-Z {{
+            0% {{ transform: rotateX(-50deg) rotateY(-40deg) rotateZ(0deg); }}
+            100% {{ transform: rotateX(-50deg) rotateY(-40deg) rotateZ(360deg); }}
+        }}
+        @keyframes float3D {{
+            0% {{ transform: translateY(0px) rotateX(0deg); }}
+            100% {{ transform: translateY(-12px) rotateX(5deg); }}
+        }}
+        @keyframes pulse3DCore {{
+            0% {{ transform: scale(0.92) translateZ(0px); box-shadow: 0 0 25px var(--yellow), 0 0 50px var(--cyan); }}
+            100% {{ transform: scale(1.08) translateZ(25px); box-shadow: 0 0 45px var(--yellow), 0 0 90px var(--cyan), 0 0 120px var(--blue); }}
         }}
         
         /* HUD Elements */
@@ -198,20 +251,20 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             text-shadow: 0 0 2px var(--cyan);
         }}
 
-        /* Center Text Typewriter */
+        /* Center Typewriter Display */
         .typewriter-container {{
             position: absolute;
-            top: 75%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60%;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
             text-align: center;
             z-index: 15;
-            min-height: 100px;
             pointer-events: none;
         }}
         #ai-response {{
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #fff;
             text-shadow: 0 0 10px var(--cyan);
             letter-spacing: 1px;
@@ -220,7 +273,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         .cursor {{
             display: inline-block;
             width: 10px;
-            height: 1.5rem;
+            height: 1.3rem;
             background: var(--cyan);
             animation: blink 1s step-end infinite;
             vertical-align: bottom;
@@ -303,10 +356,10 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         /* Text Fallback */
         .text-input-container {{
             display: flex;
-            width: 50%;
-            max-width: 600px;
             gap: 10px;
-            opacity: 0.7;
+            width: 100%;
+            max-width: 600px;
+            opacity: 0.8;
             transition: opacity 0.3s;
         }}
         .text-input-container:hover, .text-input-container:focus-within {{
@@ -343,34 +396,33 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             box-shadow: 0 0 10px var(--cyan);
         }}
 
+        #stop-btn {{
+            background: rgba(255, 68, 68, 0.15);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 0 16px;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }}
+        #stop-btn:hover {{
+            background: #ff4444;
+            color: #fff;
+            box-shadow: 0 0 12px #ff4444;
+        }}
+
         #status-text {{
             position: absolute;
             top: -25px;
             font-family: 'Orbitron', sans-serif;
             font-size: 0.8rem;
-            color: var(--cyan);
-            letter-spacing: 2px;
-            text-align: center;
-            width: 100%;
+            letter-spacing: 1px;
         }}
-
-        /* Animations */
-        @keyframes rotate-right {{
-            0% {{ transform: rotate(0deg); }}
-            100% {{ transform: rotate(360deg); }}
-        }}
-        @keyframes rotate-left {{
-            0% {{ transform: rotate(0deg); }}
-            100% {{ transform: rotate(-360deg); }}
-        }}
+        
         @keyframes pulse-glow {{
             0% {{ opacity: 0.6; box-shadow: 0 0 10px var(--cyan); }}
             100% {{ opacity: 1; box-shadow: 0 0 30px var(--cyan), 0 0 50px var(--blue); }}
-        }}
-        @keyframes pulse-text {{
-            0% {{ opacity: 0.7; }}
-            50% {{ opacity: 1; text-shadow: 0 0 10px var(--cyan); }}
-            100% {{ opacity: 0.7; }}
         }}
         @keyframes vibrate {{
             0% {{ transform: translate(0, 0); }}
@@ -404,10 +456,13 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         <div class="hud-panel hud-left"></div>
         
         <div class="reactor-container">
-            <div class="reactor-ring ring-1"></div>
-            <div class="reactor-ring ring-2"></div>
-            <div class="reactor-ring ring-3"></div>
-            <div class="reactor-core"></div>
+            <div class="ring-3d ring-3d-1"></div>
+            <div class="ring-3d ring-3d-2"></div>
+            <div class="ring-3d ring-3d-3"></div>
+            <div class="ring-3d ring-3d-4"></div>
+            <div class="reactor-core-3d">
+                <div class="reactor-core-text">ICHIKA</div>
+            </div>
         </div>
 
         <div class="typewriter-container">
