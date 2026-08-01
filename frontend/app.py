@@ -725,7 +725,7 @@ with tab_chat:
         <div class="page-sub">All-purpose AI powered by Gemma · Ask anything — coding, math, writing, campus &amp; more · Student <strong>{html.escape(st.session_state["selected_reg_no"])}</strong></div>
         """)
     with mode_col2:
-        chat_mode = st.radio("Interface Mode", ["Standard Chat", "🎙️ ICHIKA Voice Activation Mode"], key="chat_interface_mode", horizontal=True)
+        chat_mode = st.radio("Interface Mode", ["Standard Chat", "🎙️ ICHIKA Voice Activation Mode"], index=1, key="chat_interface_mode", horizontal=True)
 
     if chat_mode == "🎙️ ICHIKA Voice Activation Mode":
         st.markdown("### 🤖 ICHIKA Interactive Voice HUD")

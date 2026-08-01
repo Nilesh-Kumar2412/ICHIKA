@@ -687,6 +687,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         
         function speak(text) {{
             if (synth.speaking) synth.cancel();
+            if (synth.paused) synth.resume();
             
             const cleanSpeechText = sanitizeForSpeech(text);
             if (!cleanSpeechText) return;
