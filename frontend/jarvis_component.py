@@ -86,7 +86,12 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             justify-content: center;
             align-items: center;
             transform-style: preserve-3d;
+            cursor: pointer;
             animation: floatUltron3D 7s ease-in-out infinite alternate;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }}
+        .ultron-neural-stage:hover {{
+            transform: scale(1.05) translateY(-5px);
         }}
 
         /* Web SVG Layer */
@@ -522,7 +527,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         </div>
 
         <div class="typewriter-container">
-            <span id="ai-response">SYSTEM INITIALIZED. STANDING BY.</span><span class="cursor"></span>
+            <span id="ai-response">CLICK 3D CORE OR MIC TO SPEAK, OR TYPE COMMAND BELOW.</span><span class="cursor"></span>
         </div>
         
         <div class="history-panel">
@@ -831,20 +836,31 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         }}
         
         const stopBtn = document.getElementById('stop-btn');
+        const ultronCore = document.querySelector('.ultron-neural-stage');
 
-        // Event Listeners
-        micBtn.addEventListener('click', () => {{
-            if (!recognition) return;
+        // Toggle Voice Listening
+        function toggleListening() {{
+            if (!recognition) {{
+                typeText('VOICE INPUT UNAVAILABLE IN THIS BROWSER. TYPE COMMAND BELOW.', true);
+                return;
+            }}
             if (isListening) {{
                 recognition.stop();
             }} else {{
                 try {{
                     recognition.start();
                 }} catch (e) {{
-                    console.error(e);
+                    console.error('Recognition start error:', e);
+                    typeText('ALLOW MICROPHONE PERMISSION IN BROWSER, OR TYPE BELOW.', true);
                 }}
             }}
-        }});
+        }}
+
+        // Event Listeners
+        micBtn.addEventListener('click', toggleListening);
+        if (ultronCore) {{
+            ultronCore.addEventListener('click', toggleListening);
+        }}
         
         sendBtn.addEventListener('click', () => {{
             processUserInput(textInput.value);
