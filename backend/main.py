@@ -500,8 +500,9 @@ async def start_negotiation(req: NegotiateRequest):
     teammate_calendars = load_shared_file("teammate_calendars.json")
     filtered = {k: v for k, v in teammate_calendars.items() if k in participants}
     
-    # If user explicitly provided participants but none matched, return error
-    if not filtered and (req.participants or req.teammates):
+    # If no matching participants found in calendar (regardless of whether they were
+    # explicitly specified or came from the default fallback list), return 400.
+    if not filtered:
         available = list(teammate_calendars.keys())
         raise HTTPException(
             status_code=400,
@@ -688,7 +689,7 @@ async def chat(req: ChatRequest):
 
     try:
         import asyncio
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         
         def _call_llm():
             return client.chat.completions.create(
@@ -834,6 +835,9 @@ async def compare_code(req: CodeCompareRequest):
     title = req.problem_title or "Algorithm Benchmark"
 
     try:
+        import asyncio
+        loop = asyncio.get_running_loop()
+
         system_prompt = (
             "You are an expert algorithm evaluator and competitive programming mentor for VIT students.\n"
             "Compare two code implementations for efficiency, asymptotic time/space complexity, and code readability.\n"
@@ -849,15 +853,18 @@ async def compare_code(req: CodeCompareRequest):
         )
         user_prompt = f"PROBLEM: {title}\nLANGUAGE: {lang}\n\n=== CODE SOLUTION A ===\n{req.code_a}\n\n=== CODE SOLUTION B ===\n{req.code_b}"
 
-        response = client.chat.completions.create(
-            model=MODEL_TO_USE,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.2,
-            timeout=5.0
-        )
+        def _call_compare():
+            return client.chat.completions.create(
+                model=MODEL_TO_USE,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.2,
+                timeout=10.0,
+            )
+
+        response = await asyncio.wait_for(loop.run_in_executor(None, _call_compare), timeout=10.0)
         raw_text = response.choices[0].message.content
         cleaned = re.sub(r"```[\w]*", "", raw_text).strip()
         cleaned = re.sub(r"```", "", cleaned).strip()
