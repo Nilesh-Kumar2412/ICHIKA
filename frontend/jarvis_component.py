@@ -686,28 +686,68 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         }}
         
         function speak(text) {{
-            if (synth.speaking) synth.cancel();
-            if (synth.paused) synth.resume();
-            
+            if (!text) return;
             const cleanSpeechText = sanitizeForSpeech(text);
             if (!cleanSpeechText) return;
-            
-            const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
-            if (selectedVoice) utterance.voice = selectedVoice;
-            utterance.pitch = 1.18;  // Warm, youthful, expressive Sadie Sink tone
-            utterance.rate = 0.85;   // Relaxed, clear 0.85x talking speed
-            
-            utterance.onstart = () => {{
-                waveforms.forEach(w => w.classList.add('active'));
-                startWaveformAnimation();
-            }};
-            
-            utterance.onend = () => {{
-                waveforms.forEach(w => w.classList.remove('active'));
-                stopWaveformAnimation();
-            }};
-            
-            synth.speak(utterance);
+
+            // Strategy 1: Browser Web Speech API (Sadie Sink vocal profile)
+            if (synth && 'speechSynthesis' in window) {{
+                try {{
+                    if (synth.speaking) synth.cancel();
+                    if (synth.paused) synth.resume();
+                    
+                    const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
+                    if (selectedVoice) utterance.voice = selectedVoice;
+                    utterance.pitch = 1.18;
+                    utterance.rate = 0.85;
+                    
+                    utterance.onstart = () => {{
+                        waveforms.forEach(w => w.classList.add('active'));
+                        startWaveformAnimation();
+                    }};
+                    
+                    utterance.onend = () => {{
+                        waveforms.forEach(w => w.classList.remove('active'));
+                        stopWaveformAnimation();
+                    }};
+
+                    utterance.onerror = () => {{
+                        fallbackBackendTts(cleanSpeechText);
+                    }};
+                    
+                    synth.speak(utterance);
+                    return;
+                }} catch (e) {{
+                    console.warn('SpeechSynthesis failed, falling back to server TTS:', e);
+                }}
+            }}
+
+            // Strategy 2: Backend Audio Fallback (/tts)
+            fallbackBackendTts(cleanSpeechText);
+        }}
+
+        function fallbackBackendTts(cleanText) {{
+            try {{
+                const apiHost = (typeof BACKEND_URL === 'string' && BACKEND_URL.trim() && BACKEND_URL.startsWith('http')) 
+                    ? BACKEND_URL.trim().replace(/\/+$/, '') 
+                    : 'http://127.0.0.1:8000';
+                const audioUrl = apiHost + '/tts?text=' + encodeURIComponent(cleanText.slice(0, 400));
+                const audio = new Audio(audioUrl);
+                
+                audio.onplay = () => {{
+                    waveforms.forEach(w => w.classList.add('active'));
+                    startWaveformAnimation();
+                }};
+                
+                audio.onended = () => {{
+                    waveforms.forEach(w => w.classList.remove('active'));
+                    stopWaveformAnimation();
+                }};
+                
+                audio.play().catch(e => console.warn('Backend audio play failed:', e));
+            }} catch(err) {{
+                console.error('Backend TTS error:', err);
+            }}
         }}
         
         // Waveform Animation

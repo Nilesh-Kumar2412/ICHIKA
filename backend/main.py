@@ -23,7 +23,7 @@ import time
 import queue
 import tempfile
 import threading
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, Union
@@ -706,6 +706,28 @@ async def chat(req: ChatRequest):
         print(f"[CHAT ERROR] LLM Call failed: {e}")
         fallback_msg = generate_smart_chat_fallback(req.text, sid, req.tone)
         return {"response": fallback_msg, "source": "fallback"}
+
+# ─── BACKEND TEXT-TO-SPEECH (TTS) ENDPOINT ─────────────────
+@app.get("/tts")
+def tts_stream(text: str):
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="text parameter is required.")
+    
+    clean_text = "".join(c for c in text if c.isalnum() or c.isspace() or c in ".,!?")
+    if not clean_text.strip():
+        clean_text = "System active."
+
+    try:
+        from gtts import gTTS
+        import io
+        mp3_buffer = io.BytesIO()
+        tts = gTTS(text=clean_text[:600], lang="en", slow=False)
+        tts.write_to_fp(mp3_buffer)
+        mp3_buffer.seek(0)
+        return Response(content=mp3_buffer.read(), media_type="audio/mpeg")
+    except Exception as e:
+        print(f"[TTS ENDPOINT ERROR] {e}")
+        raise HTTPException(status_code=500, detail=f"TTS error: {e}")
 
 # ─── COMPARATIVE CODING ENDPOINT (POST) ─────────────────────
 def analyze_code_comparison_fallback(code_a: str, code_b: str, language: str, problem_title: str) -> dict:
