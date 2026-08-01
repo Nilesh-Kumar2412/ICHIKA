@@ -658,13 +658,29 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             loadVoices();
         }}
         
+        // Clean markdown/symbols from text before vocalizing
+        function sanitizeForSpeech(rawText) {{
+            if (!rawText) return '';
+            return rawText
+                .replace(/```[\s\S]*?```/g, ' code block omitted ')
+                .replace(/`([^`]+)`/g, '$1')
+                .replace(/<[^>]*>/g, '')
+                .replace(/[*#_~>|\\-]/g, ' ')
+                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }}
+        
         function speak(text) {{
             if (synth.speaking) synth.cancel();
             
-            const utterance = new SpeechSynthesisUtterance(text);
+            const cleanSpeechText = sanitizeForSpeech(text);
+            if (!cleanSpeechText) return;
+            
+            const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
             if (selectedVoice) utterance.voice = selectedVoice;
-            utterance.pitch = 1.05;
-            utterance.rate = 1.0;
+            utterance.pitch = 1.12;  // Soft, warm female tone
+            utterance.rate = 0.94;   // Natural human speech pace
             
             utterance.onstart = () => {{
                 waveforms.forEach(w => w.classList.add('active'));
@@ -697,7 +713,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             }});
         }}
         
-        // Typewriter Effect
+        // Typewriter Effect (0.6x relaxed speed)
         function typeText(text, instant = false) {{
             clearInterval(typingInterval);
             if (instant) {{
@@ -714,7 +730,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 }} else {{
                     clearInterval(typingInterval);
                 }}
-            }}, 15);
+            }}, 28);
         }}
         
         // History Management
