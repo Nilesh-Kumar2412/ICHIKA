@@ -788,40 +788,49 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             typeText('PROCESSING...', true);
             textInput.value = '';
             
-            const cleanBackend = BACKEND_URL.endsWith('/') ? BACKEND_URL.slice(0, -1) : BACKEND_URL;
-            const targetUrls = [
-                cleanBackend + '/chat',
+            const apiHost = (typeof BACKEND_URL === 'string' && BACKEND_URL.trim() && BACKEND_URL.startsWith('http')) 
+                ? BACKEND_URL.trim().replace(/\/+$/, '') 
+                : 'http://127.0.0.1:8000';
+
+            const candidateUrls = [
+                apiHost + '/chat',
                 'http://127.0.0.1:8000/chat',
                 'http://localhost:8000/chat'
             ];
+
+            let finalData = null;
+            let success = false;
             
-            let res = null;
-            let lastError = null;
-            
-            for (const url of targetUrls) {{
+            for (const targetUrl of candidateUrls) {{
                 try {{
-                    res = await fetch(url, {{
+                    const res = await fetch(targetUrl, {{
                         method: 'POST',
-                        headers: {{ 'Content-Type': 'application/json' }},
+                        headers: {{ 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }},
                         body: JSON.stringify({{
                             text: text,
                             tone: 'casual',
                             student_id: STUDENT_ID
                         }})
                     }});
-                    if (res && res.ok) break;
+                    if (res && res.ok) {{
+                        finalData = await res.json();
+                        success = true;
+                        break;
+                    }}
                 }} catch (e) {{
-                    lastError = e;
+                    console.warn('Backend attempt failed:', targetUrl, e);
                 }}
             }}
             
             try {{
-                if (!res || !res.ok) {{
-                    throw new Error(lastError || 'All server endpoints unreachable.');
+                if (!success || !finalData) {{
+                    throw new Error('All backend endpoints failed to respond.');
                 }}
                 
-                const data = await res.json();
-                let reply = data.response || 'I am unable to process that request at this time.';
+                let reply = finalData.response || 'I am unable to process that request at this time.';
                 reply = reply.replace(/<thought>[^]*?<\/thought>/gi, '').replace(/<think>[^]*?<\/think>/gi, '').trim();
                 if (!reply) reply = 'System ready.';
                 
@@ -831,7 +840,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 
             }} catch (error) {{
                 console.error(error);
-                const errorMsg = 'SYSTEM RECOVERY: Mainframe connection restored. Try asking again!';
+                const errorMsg = 'UNABLE TO REACH SERVER. Ensure FastAPI backend is running on http://127.0.0.1:8000.';
                 addToHistory('AI', errorMsg);
                 typeText(errorMsg);
                 speak(errorMsg);

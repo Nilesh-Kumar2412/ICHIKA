@@ -727,8 +727,8 @@ with tab_chat:
 
     if chat_mode == "🎙️ ICHIKA Voice Activation Mode":
         st.markdown("### 🤖 ICHIKA Interactive Voice HUD")
-        st.caption("Advanced holographic voice interface. Uses Web Speech API for smooth voice input/output & real-time arc reactor diagnostics.")
-        jarvis_html = get_jarvis_html(BACKEND_URL, st.session_state["selected_reg_no"])
+        active_b_url = BACKEND_URL if (isinstance(BACKEND_URL, str) and BACKEND_URL.strip().startswith("http")) else "http://127.0.0.1:8000"
+        jarvis_html = get_jarvis_html(active_b_url, st.session_state["selected_reg_no"])
         components.html(jarvis_html, height=720, scrolling=False)
     else:
         tone_sel = st.selectbox("Persona Tone", ["formal", "casual", "concise"])
