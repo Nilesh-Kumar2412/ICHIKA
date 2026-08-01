@@ -789,7 +789,7 @@ with tab_chat:
                                 "history": history_payload,
                                 "student_id": st.session_state["selected_reg_no"]
                             },
-                            timeout=60
+                            timeout=15
                         )
                         if res.status_code == 200:
                             data = res.json()

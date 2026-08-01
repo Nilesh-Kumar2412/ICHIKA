@@ -687,12 +687,18 @@ async def chat(req: ChatRequest):
     messages.append({"role": "user", "content": req.text})
 
     try:
-        response = client.chat.completions.create(
-            model=MODEL_TO_USE,
-            messages=messages,
-            temperature=0.7,
-            timeout=30.0,
-        )
+        import asyncio
+        loop = asyncio.get_event_loop()
+        
+        def _call_llm():
+            return client.chat.completions.create(
+                model=MODEL_TO_USE,
+                messages=messages,
+                temperature=0.7,
+                timeout=12.0,
+            )
+
+        response = await asyncio.wait_for(loop.run_in_executor(None, _call_llm), timeout=12.0)
         ai_text = response.choices[0].message.content or ""
         
         # Strip internal thinking/reasoning tags (<thought>...</thought> or <think>...</think>)
@@ -703,7 +709,7 @@ async def chat(req: ChatRequest):
 
         return {"response": clean_ai_text, "source": "llm"}
     except Exception as e:
-        print(f"[CHAT ERROR] LLM Call failed: {e}")
+        print(f"[CHAT ERROR] LLM Call failed or timed out: {e}")
         fallback_msg = generate_smart_chat_fallback(req.text, sid, req.tone)
         return {"response": fallback_msg, "source": "fallback"}
 
