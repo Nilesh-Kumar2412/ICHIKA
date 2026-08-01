@@ -327,7 +327,7 @@ with st.sidebar:
         st.session_state.university = uni_choice
         st.rerun()
 
-    BACKEND_URL = st.text_input("API Base Endpoint", value=st.session_state.get("backend_url", "http://127.0.0.1:8000"), key="backend_url")
+    BACKEND_URL = st.text_input("API Base Endpoint", key="backend_url")
     if not BACKEND_URL or not BACKEND_URL.strip().startswith("http"):
         BACKEND_URL = "http://127.0.0.1:8000"
 
