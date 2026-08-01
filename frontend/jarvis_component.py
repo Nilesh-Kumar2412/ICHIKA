@@ -679,8 +679,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 .replace(/```[^]*?```/g, ' code block omitted ')
                 .replace(/`([^`]+)`/g, '$1')
                 .replace(/<[^>]*>/g, '')
-                .replace(/[*#_~>|\\-]/g, ' ')
-                .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                .replace(/[*#_~>|\\\\-]/g, ' ')
+                .replace(/\\[([^\\]]+)\\]\\([^)]+\\)/g, '$1')
                 .replace(/[ \t\r\n]+/g, ' ')
                 .trim();
         }}
@@ -729,7 +729,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         function fallbackBackendTts(cleanText) {{
             try {{
                 const apiHost = (typeof BACKEND_URL === 'string' && BACKEND_URL.trim() && BACKEND_URL.startsWith('http')) 
-                    ? BACKEND_URL.trim().replace(/\/+$/, '') 
+                    ? BACKEND_URL.trim().replace(/\\/+$/, '') 
                     : 'http://127.0.0.1:8000';
                 const audioUrl = apiHost + '/tts?text=' + encodeURIComponent(cleanText.slice(0, 400));
                 const audio = new Audio(audioUrl);
@@ -819,20 +819,10 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             }}
         }}
         
-        // Multi-Target Failover Process Input (Prevents Network Failures)
-        async function processUserInput(text) {{
-            if (!text.trim()) return;
-            
-            isProcessing = true;
-            updateMicUI('processing');
-            addToHistory('USER', text);
-            typeText('PROCESSING...', true);
-            textInput.value = '';
-            
         // Robust API Request with fetch + XMLHttpRequest fallback
         async function sendChatApiRequest(text) {{
             const apiHost = (typeof BACKEND_URL === 'string' && BACKEND_URL.trim() && BACKEND_URL.startsWith('http')) 
-                ? BACKEND_URL.trim().replace(/\/+$/, '') 
+                ? BACKEND_URL.trim().replace(/\\/+$/, '') 
                 : 'http://127.0.0.1:8000';
 
             const candidateUrls = [
@@ -903,7 +893,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 }}
                 
                 let reply = data.response || 'I am unable to process that request at this time.';
-                reply = reply.replace(/<thought>[^]*?<\/thought>/gi, '').replace(/<think>[^]*?<\/think>/gi, '').trim();
+                reply = reply.replace(/<thought>[^]*?<\\/thought>/gi, '').replace(/<think>[^]*?<\\/think>/gi, '').trim();
                 if (!reply) reply = 'System ready.';
                 
                 addToHistory('AI', reply);
