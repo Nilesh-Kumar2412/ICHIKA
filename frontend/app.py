@@ -20,7 +20,7 @@ st.set_page_config(
 )
 
 # Resolve backend URL: Streamlit Cloud secrets > env > localhost fallback
-_default_backend = "http://localhost:8000"
+_default_backend = "http://127.0.0.1:8000"
 try:
     _default_backend = st.secrets.get("BACKEND_URL", _default_backend)
 except Exception:
@@ -327,7 +327,9 @@ with st.sidebar:
         st.session_state.university = uni_choice
         st.rerun()
 
-    BACKEND_URL = st.text_input("API Base Endpoint", key="backend_url")
+    BACKEND_URL = st.text_input("API Base Endpoint", value=st.session_state.get("backend_url", "http://127.0.0.1:8000"), key="backend_url")
+    if not BACKEND_URL or not BACKEND_URL.strip().startswith("http"):
+        BACKEND_URL = "http://127.0.0.1:8000"
 
     available_students = ["26BEC1185", "26BLC1265", "26BLC1001", "26BLC1002", "26BLC1003"]
     try:
