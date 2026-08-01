@@ -788,6 +788,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             typeText('PROCESSING...', true);
             textInput.value = '';
             
+        // Robust API Request with fetch + XMLHttpRequest fallback
+        async function sendChatApiRequest(text) {{
             const apiHost = (typeof BACKEND_URL === 'string' && BACKEND_URL.trim() && BACKEND_URL.startsWith('http')) 
                 ? BACKEND_URL.trim().replace(/\/+$/, '') 
                 : 'http://127.0.0.1:8000';
@@ -798,39 +800,68 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 'http://localhost:8000/chat'
             ];
 
-            let finalData = null;
-            let success = false;
-            
-            for (const targetUrl of candidateUrls) {{
+            const payload = JSON.stringify({{
+                text: text,
+                tone: 'casual',
+                student_id: STUDENT_ID
+            }});
+
+            for (const url of candidateUrls) {{
+                // Strategy 1: Fetch API
                 try {{
-                    const res = await fetch(targetUrl, {{
+                    const res = await fetch(url, {{
                         method: 'POST',
-                        headers: {{ 
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }},
-                        body: JSON.stringify({{
-                            text: text,
-                            tone: 'casual',
-                            student_id: STUDENT_ID
-                        }})
+                        headers: {{ 'Content-Type': 'application/json', 'Accept': 'application/json' }},
+                        body: payload
                     }});
                     if (res && res.ok) {{
-                        finalData = await res.json();
-                        success = true;
-                        break;
+                        return await res.json();
                     }}
                 }} catch (e) {{
-                    console.warn('Backend attempt failed:', targetUrl, e);
+                    console.warn('Fetch failed for:', url, e);
+                }}
+
+                // Strategy 2: XMLHttpRequest (XHR) Fallback for iframe cross-origin
+                try {{
+                    const xhrData = await new Promise((resolve, reject) => {{
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', url, true);
+                        xhr.setRequestHeader('Content-Type', 'application/json');
+                        xhr.timeout = 15000;
+                        xhr.onload = function() {{
+                            if (xhr.status >= 200 && xhr.status < 300) {{
+                                try {{ resolve(JSON.parse(xhr.responseText)); }} catch(err) {{ reject(err); }}
+                            }} else {{ reject(new Error('Status ' + xhr.status)); }}
+                        }};
+                        xhr.onerror = function() {{ reject(new Error('XHR error')); }};
+                        xhr.ontimeout = function() {{ reject(new Error('XHR timeout')); }};
+                        xhr.send(payload);
+                    }});
+                    if (xhrData) return xhrData;
+                }} catch (e) {{
+                    console.warn('XHR failed for:', url, e);
                 }}
             }}
+            return null;
+        }}
+
+        // Process Input
+        async function processUserInput(text) {{
+            if (!text || !text.trim()) return;
+            
+            isProcessing = true;
+            updateMicUI('processing');
+            addToHistory('USER', text);
+            typeText('PROCESSING...', true);
+            textInput.value = '';
             
             try {{
-                if (!success || !finalData) {{
-                    throw new Error('All backend endpoints failed to respond.');
+                const data = await sendChatApiRequest(text);
+                if (!data) {{
+                    throw new Error('All backend API endpoints failed.');
                 }}
                 
-                let reply = finalData.response || 'I am unable to process that request at this time.';
+                let reply = data.response || 'I am unable to process that request at this time.';
                 reply = reply.replace(/<thought>[^]*?<\/thought>/gi, '').replace(/<think>[^]*?<\/think>/gi, '').trim();
                 if (!reply) reply = 'System ready.';
                 
@@ -840,7 +871,7 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
                 
             }} catch (error) {{
                 console.error(error);
-                const errorMsg = 'UNABLE TO REACH SERVER. Ensure FastAPI backend is running on http://127.0.0.1:8000.';
+                const errorMsg = 'SYSTEM RECOVERY: Check backend server status on http://127.0.0.1:8000.';
                 addToHistory('AI', errorMsg);
                 typeText(errorMsg);
                 speak(errorMsg);
@@ -853,62 +884,67 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         const stopBtn = document.getElementById('stop-btn');
         const ultronCore = document.querySelector('.ultron-neural-stage');
 
-        // Toggle Voice Listening with Explicit Browser Mic Permission Prompt
-        async function toggleListening() {{
+        // Toggle Voice Listening (Zero Deadlock)
+        function toggleListening() {{
             if (!recognition) {{
-                typeText('VOICE INPUT UNAVAILABLE IN THIS BROWSER. PLEASE USE CHROME/EDGE OR TYPE BELOW.', true);
+                typeText('VOICE INPUT UNAVAILABLE IN THIS BROWSER. TYPE COMMAND BELOW.', true);
                 return;
             }}
             if (isListening) {{
-                recognition.stop();
+                try {{ recognition.stop(); }} catch(e) {{}}
+                isListening = false;
+                updateMicUI('idle');
                 return;
             }}
 
             try {{
-                // Request media permission explicitly to trigger browser permission dialog
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {{
-                    await navigator.mediaDevices.getUserMedia({{ audio: true }});
-                }}
                 recognition.start();
             }} catch (e) {{
-                console.error('Mic permission/start error:', e);
-                if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {{
-                    typeText('MICROPHONE BLOCKED. CLICK LOCK ICON IN ADDRESS BAR -> ALLOW MICROPHONE.', true);
-                }} else {{
-                    try {{
-                        recognition.start();
-                    }} catch (err) {{
-                        typeText('CLICK MIC AGAIN OR ALLOW MICROPHONE PERMISSION IN BROWSER.', true);
-                    }}
+                console.error('Recognition start error:', e);
+                try {{
+                    recognition.stop();
+                    setTimeout(() => {{
+                        try {{ recognition.start(); }} catch(err) {{
+                            typeText('ALLOW MICROPHONE PERMISSION IN BROWSER OR TYPE BELOW.', true);
+                        }}
+                    }}, 200);
+                }} catch (err) {{
+                    typeText('CLICK MIC AGAIN OR ALLOW MICROPHONE PERMISSION IN BROWSER.', true);
                 }}
             }}
         }}
 
         // Event Listeners
-        micBtn.addEventListener('click', toggleListening);
-        if (ultronCore) {{
-            ultronCore.addEventListener('click', toggleListening);
+        if (micBtn) micBtn.addEventListener('click', toggleListening);
+        if (ultronCore) ultronCore.addEventListener('click', toggleListening);
+        
+        if (sendBtn) {{
+            sendBtn.addEventListener('click', () => {{
+                processUserInput(textInput.value);
+            }});
         }}
         
-        sendBtn.addEventListener('click', () => {{
-            processUserInput(textInput.value);
-        }});
-        
-        textInput.addEventListener('keypress', (e) => {{
-            if (e.key === 'Enter') {{
-                processUserInput(textInput.value);
-            }}
-        }});
+        if (textInput) {{
+            textInput.addEventListener('keypress', (e) => {{
+                if (e.key === 'Enter') {{
+                    processUserInput(textInput.value);
+                }}
+            }});
+        }}
 
-        stopBtn.addEventListener('click', () => {{
-            if (synth.speaking) synth.cancel();
-            if (recognition && isListening) recognition.stop();
-            clearInterval(typingInterval);
-            stopWaveformAnimation();
-            isProcessing = false;
-            updateMicUI('idle');
-            typeText('SYSTEM OVERRIDE: INTERRUPTED', true);
-        }});
+        if (stopBtn) {{
+            stopBtn.addEventListener('click', () => {{
+                if (synth.speaking) synth.cancel();
+                if (recognition && isListening) {{
+                    try {{ recognition.stop(); }} catch(e) {{}}
+                }}
+                clearInterval(typingInterval);
+                stopWaveformAnimation();
+                isProcessing = false;
+                updateMicUI('idle');
+                typeText('SYSTEM OVERRIDE: INTERRUPTED', true);
+            }});
+        }}
     </script>
 </body>
 </html>
