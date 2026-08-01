@@ -707,6 +707,32 @@ async def chat(req: ChatRequest):
         fallback_msg = generate_smart_chat_fallback(req.text, sid, req.tone)
         return {"response": fallback_msg, "source": "fallback"}
 
+# ─── BACKEND SPEECH-TO-TEXT (STT) ENDPOINT ─────────────────
+@app.post("/stt")
+async def stt_transcribe(file: UploadFile = File(...)):
+    try:
+        import speech_recognition as sr
+        contents = await file.read()
+        
+        tmp_fd, tmp_path = tempfile.mkstemp(suffix=".wav")
+        with os.fdopen(tmp_fd, 'wb') as f:
+            f.write(contents)
+            
+        r = sr.Recognizer()
+        with sr.AudioFile(tmp_path) as source:
+            audio_data = r.record(source)
+            text = r.recognize_google(audio_data)
+            
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass
+            
+        return {"text": text, "status": "success"}
+    except Exception as e:
+        print(f"[STT ENDPOINT ERROR] {e}")
+        return {"text": "", "status": "error", "detail": str(e)}
+
 # ─── BACKEND TEXT-TO-SPEECH (TTS) ENDPOINT ─────────────────
 @app.get("/tts")
 def tts_stream(text: str):

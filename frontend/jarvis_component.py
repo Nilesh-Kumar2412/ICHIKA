@@ -915,34 +915,99 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         const stopBtn = document.getElementById('stop-btn');
         const ultronCore = document.querySelector('.ultron-neural-stage');
 
-        // Toggle Voice Listening (Zero Deadlock)
-        function toggleListening() {{
-            if (!recognition) {{
-                typeText('VOICE INPUT UNAVAILABLE IN THIS BROWSER. TYPE COMMAND BELOW.', true);
-                return;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let activeStream = null;
+
+        async function startMediaRecorderListening() {{
+            try {{
+                activeStream = await navigator.mediaDevices.getUserMedia({{ audio: true }});
+                mediaRecorder = new MediaRecorder(activeStream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {{
+                    if (event.data.size > 0) audioChunks.push(event.data);
+                }};
+                
+                mediaRecorder.onstop = async () => {{
+                    isListening = false;
+                    updateMicUI('processing');
+                    typeText('TRANSCRIBING AUDIO VIA SERVER...', true);
+                    
+                    const audioBlob = new Blob(audioChunks, {{ type: 'audio/wav' }});
+                    const formData = new FormData();
+                    formData.append('file', audioBlob, 'voice_input.wav');
+                    
+                    try {{
+                        const apiHost = (typeof BACKEND_URL === 'string' && BACKEND_URL.trim() && BACKEND_URL.startsWith('http')) 
+                            ? BACKEND_URL.trim().replace(/\\/+$/, '') 
+                            : 'http://127.0.0.1:8000';
+                            
+                        const res = await fetch(apiHost + '/stt', {{
+                            method: 'POST',
+                            body: formData
+                        }});
+                        
+                        if (res.ok) {{
+                            const data = await res.json();
+                            if (data.text && data.text.trim()) {{
+                                processUserInput(data.text.trim());
+                            }} else {{
+                                typeText('AUDIO TRANSCRIBED. ASK ANYTHING AGAIN OR TYPE BELOW.', true);
+                                updateMicUI('idle');
+                            }}
+                        }} else {{
+                            throw new Error('STT error');
+                        }}
+                    }} catch (err) {{
+                        console.error('MediaRecorder STT error:', err);
+                        typeText('VOICE AUDIO CAPTURED. TYPE COMMAND BELOW.', true);
+                        updateMicUI('idle');
+                    }}
+                    
+                    if (activeStream) {{
+                        activeStream.getTracks().forEach(track => track.stop());
+                    }}
+                }};
+                
+                mediaRecorder.start();
+                isListening = true;
+                updateMicUI('listening');
+                typeText('LISTENING (VOICE CAPTURE ACTIVE)...');
+                waveforms.forEach(w => w.classList.add('active'));
+                startWaveformAnimation();
+                
+            }} catch (e) {{
+                console.error('getUserMedia error:', e);
+                typeText('MICROPHONE ACCESS BLOCKED. CLICK LOCK ICON IN ADDRESS BAR -> ALLOW MIC.', true);
+                updateMicUI('idle');
+                isListening = false;
             }}
+        }}
+
+        // Toggle Voice Listening (Dual-Engine: WebSpeech + MediaRecorder Fallback)
+        function toggleListening() {{
             if (isListening) {{
-                try {{ recognition.stop(); }} catch(e) {{}}
+                if (mediaRecorder && mediaRecorder.state === 'recording') {{
+                    try {{ mediaRecorder.stop(); }} catch(e) {{}}
+                }} else if (recognition) {{
+                    try {{ recognition.stop(); }} catch(e) {{}}
+                }}
                 isListening = false;
                 updateMicUI('idle');
                 return;
             }}
 
-            try {{
-                recognition.start();
-            }} catch (e) {{
-                console.error('Recognition start error:', e);
+            if (recognition) {{
                 try {{
-                    recognition.stop();
-                    setTimeout(() => {{
-                        try {{ recognition.start(); }} catch(err) {{
-                            typeText('ALLOW MICROPHONE PERMISSION IN BROWSER OR TYPE BELOW.', true);
-                        }}
-                    }}, 200);
-                }} catch (err) {{
-                    typeText('CLICK MIC AGAIN OR ALLOW MICROPHONE PERMISSION IN BROWSER.', true);
+                    recognition.start();
+                    return;
+                }} catch (e) {{
+                    console.warn('SpeechRecognition start failed, trying MediaRecorder fallback:', e);
                 }}
             }}
+            
+            startMediaRecorderListening();
         }}
 
         // Event Listeners
