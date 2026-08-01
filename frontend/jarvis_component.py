@@ -665,12 +665,12 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         function sanitizeForSpeech(rawText) {{
             if (!rawText) return '';
             return rawText
-                .replace(/```[\s\S]*?```/g, ' code block omitted ')
+                .replace(/```[^]*?```/g, ' code block omitted ')
                 .replace(/`([^`]+)`/g, '$1')
                 .replace(/<[^>]*>/g, '')
                 .replace(/[*#_~>|\\-]/g, ' ')
                 .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-                .replace(/\s+/g, ' ')
+                .replace(/[ \t\r\n]+/g, ' ')
                 .trim();
         }}
         
