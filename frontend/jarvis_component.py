@@ -627,8 +627,14 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             recognition.onerror = (event) => {{
                 console.error('Speech recognition error', event.error);
                 updateMicUI('idle');
-                typeText('ERROR: VOICE INPUT FAILED');
                 isListening = false;
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {{
+                    typeText('MICROPHONE ACCESS BLOCKED. CLICK THE LOCK ICON IN YOUR ADDRESS BAR AND SET MIC TO ALLOW.', true);
+                }} else if (event.error === 'no-speech') {{
+                    typeText('NO SPEECH DETECTED. CLICK MIC AGAIN AND SPEAK CLEARLY.', true);
+                }} else {{
+                    typeText('VOICE ERROR: ' + event.error.toUpperCase() + '. TYPE COMMAND BELOW OR TRY AGAIN.', true);
+                }}
             }};
             
             recognition.onend = () => {{
@@ -838,20 +844,33 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
         const stopBtn = document.getElementById('stop-btn');
         const ultronCore = document.querySelector('.ultron-neural-stage');
 
-        // Toggle Voice Listening
-        function toggleListening() {{
+        // Toggle Voice Listening with Explicit Browser Mic Permission Prompt
+        async function toggleListening() {{
             if (!recognition) {{
-                typeText('VOICE INPUT UNAVAILABLE IN THIS BROWSER. TYPE COMMAND BELOW.', true);
+                typeText('VOICE INPUT UNAVAILABLE IN THIS BROWSER. PLEASE USE CHROME/EDGE OR TYPE BELOW.', true);
                 return;
             }}
             if (isListening) {{
                 recognition.stop();
-            }} else {{
-                try {{
-                    recognition.start();
-                }} catch (e) {{
-                    console.error('Recognition start error:', e);
-                    typeText('ALLOW MICROPHONE PERMISSION IN BROWSER, OR TYPE BELOW.', true);
+                return;
+            }}
+
+            try {{
+                // Request media permission explicitly to trigger browser permission dialog
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {{
+                    await navigator.mediaDevices.getUserMedia({{ audio: true }});
+                }}
+                recognition.start();
+            }} catch (e) {{
+                console.error('Mic permission/start error:', e);
+                if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {{
+                    typeText('MICROPHONE BLOCKED. CLICK LOCK ICON IN ADDRESS BAR -> ALLOW MICROPHONE.', true);
+                }} else {{
+                    try {{
+                        recognition.start();
+                    }} catch (err) {{
+                        typeText('CLICK MIC AGAIN OR ALLOW MICROPHONE PERMISSION IN BROWSER.', true);
+                    }}
                 }}
             }}
         }}
