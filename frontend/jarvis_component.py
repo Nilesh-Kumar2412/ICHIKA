@@ -638,15 +638,18 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             statusText.innerText = 'VOICE UNAVAILABLE';
         }}
         
-        // Setup Speech Synthesis — Prioritize Female Voice
+        // Setup Speech Synthesis — Prioritize High-Quality Expressive Female Voice (Sadie Sink style)
         function loadVoices() {{
             const voices = synth.getVoices();
+            // Search for premium natural female voices across OS platforms
             selectedVoice = voices.find(v => 
                 v.name.includes('Google UK English Female') || 
                 v.name.includes('Google US English') ||
+                v.name.includes('Microsoft Jenny') ||
+                v.name.includes('Microsoft Aria') ||
                 v.name.includes('Samantha') || 
                 v.name.includes('Victoria') || 
-                v.name.includes('Zira') || 
+                v.name.includes('Microsoft Zira') || 
                 v.name.includes('Karen') || 
                 v.name.includes('Fiona') ||
                 v.name.toLowerCase().includes('female')
@@ -679,8 +682,8 @@ def get_jarvis_html(backend_url: str, student_id: str = '26BEC1185') -> str:
             
             const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
             if (selectedVoice) utterance.voice = selectedVoice;
-            utterance.pitch = 1.12;  // Soft, warm female tone
-            utterance.rate = 0.94;   // Natural human speech pace
+            utterance.pitch = 1.18;  // Warm, youthful, expressive Sadie Sink tone
+            utterance.rate = 0.85;   // Relaxed, clear 0.85x talking speed
             
             utterance.onstart = () => {{
                 waveforms.forEach(w => w.classList.add('active'));
