@@ -664,6 +664,42 @@ def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
     return f"I'm processing your request. Please ask your question again or try a quick prompt!"
 
 
+def call_gemini_native_failover(prompt: str, system_prompt: str = "", history: list = None):
+    if not GEMINI_API_KEY or GEMINI_API_KEY in ("", "your_gemini_api_key_here"):
+        raise ValueError("GEMINI_API_KEY not configured")
+
+    models = ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-3.6-flash", "gemma-4-26b-a4b-it"]
+    contents = []
+    if history:
+        for m in history:
+            role = "user" if (getattr(m, "role", "") == "user" or (isinstance(m, dict) and m.get("role") == "user")) else "model"
+            text = getattr(m, "content", "") if hasattr(m, "content") else (m.get("content", "") if isinstance(m, dict) else "")
+            if text:
+                contents.append({"role": role, "parts": [{"text": text}]})
+    contents.append({"role": "user", "parts": [{"text": prompt}]})
+
+    payload = {"contents": contents}
+    if system_prompt:
+        payload["systemInstruction"] = {"parts": [{"text": system_prompt}]}
+
+    encoded_data = json.dumps(payload).encode("utf-8")
+
+    import urllib.request
+    for model in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
+        req = urllib.request.Request(url, data=encoded_data, headers={"Content-Type": "application/json"})
+        try:
+            res = urllib.request.urlopen(req, timeout=12.0)
+            data = json.loads(res.read().decode("utf-8"))
+            txt = data["candidates"][0]["content"]["parts"][0]["text"]
+            return txt.strip(), model
+        except Exception as e:
+            print(f"[GEMINI NATIVE FAILOVER] Model '{model}' failed: {e}. Trying next...")
+            continue
+
+    raise TimeoutError("All Gemini native models exhausted")
+
+
 # ─── CHAT ENDPOINT (POST) ──────────────────────────────────
 @app.post("/chat")
 async def chat(req: ChatRequest):
@@ -682,6 +718,23 @@ async def chat(req: ChatRequest):
     
     system_content = f"{SYSTEM_PROMPT_BASE}\n\n{tone_instruction}{schedule_context}"
 
+    # Tier 1: Try Native Gemini REST Failover Chain (sub-second fast)
+    try:
+        import asyncio
+        loop = asyncio.get_running_loop()
+        ai_text, used_model = await asyncio.wait_for(
+            loop.run_in_executor(None, call_gemini_native_failover, req.text, system_content, req.history),
+            timeout=15.0
+        )
+        clean_ai_text = re.sub(r'<thought>.*?</thought>', '', ai_text, flags=re.DOTALL)
+        clean_ai_text = re.sub(r'<think>.*?</think>', '', clean_ai_text, flags=re.DOTALL).strip()
+        if not clean_ai_text:
+            clean_ai_text = ai_text.strip()
+        return {"response": clean_ai_text, "source": f"llm_native ({used_model})"}
+    except Exception as e:
+        print(f"[CHAT NATIVE LLM FAILOVER] {e}. Trying OpenAI compatibility client...")
+
+    # Tier 2: Try OpenAI Compatibility Client (Groq / LM Studio)
     messages = [{"role": "system", "content": system_content}]
     for msg in (req.history or [])[-20:]:
         if msg.role in ("user", "assistant"):
@@ -697,19 +750,17 @@ async def chat(req: ChatRequest):
                 model=MODEL_TO_USE,
                 messages=messages,
                 temperature=0.7,
-                timeout=60.0,
+                timeout=15.0,
             )
 
-        response = await asyncio.wait_for(loop.run_in_executor(None, _call_llm), timeout=60.0)
+        response = await asyncio.wait_for(loop.run_in_executor(None, _call_llm), timeout=15.0)
         ai_text = response.choices[0].message.content or ""
-        
-        # Strip internal thinking/reasoning tags (<thought>...</thought> or <think>...</think>)
         clean_ai_text = re.sub(r'<thought>.*?</thought>', '', ai_text, flags=re.DOTALL)
         clean_ai_text = re.sub(r'<think>.*?</think>', '', clean_ai_text, flags=re.DOTALL).strip()
         if not clean_ai_text:
             clean_ai_text = ai_text.strip()
 
-        return {"response": clean_ai_text, "source": "llm"}
+        return {"response": clean_ai_text, "source": "llm_openai"}
     except Exception as e:
         import traceback
         print(f"[CHAT ERROR] LLM Call failed or timed out: {e}\n{traceback.format_exc()}")
