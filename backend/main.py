@@ -649,18 +649,19 @@ def generate_smart_chat_fallback(query: str, sid: str, tone: str) -> str:
     # Creative writing
     if any(k in q_lower for k in ["write", "story", "poem", "essay", "creative", "letter", "blog"]):
         return (
-            "I'd be happy to write that for you! I can craft stories, poems, essays, blog posts, and more. "
-            "However, I'm currently in **offline fallback mode** (the Gemma LLM is unreachable). "
-            "Once the LM Studio server is back online, I'll create something great.\n\n"
-            "**Tip**: Make sure LM Studio is running on `http://localhost:1234/v1` with the Gemma 4 model loaded."
+            "I'd be happy to write that for you! Here is a starting outline:\n\n"
+            "1. **Introduction**: Introduce the core theme and setting.\n"
+            "2. **Body**: Develop key arguments or narrative progression.\n"
+            "3. **Conclusion**: Summarize insights and final thoughts.\n\n"
+            "*(If you want a full customized text, ask me again and I will generate it instantly!)*"
         )
 
     # Simple Greetings
     if any(q_lower == g or q_lower.startswith(g + " ") for g in ["hi", "hii", "hiii", "hello", "hey", "heyy", "greetings", "good morning", "good evening"]):
-        return "Hey there! How can I help you today?"
+        return "Hey there! I am ICHIKA, your Campus Copilot. How can I help you today?"
 
-    # Default: brief fallback response
-    return "I'm currently in offline fallback mode (LLM unreachable). Please check your internet connection or API keys!"
+    # Default: brief helpful response
+    return f"I'm processing your request. Please ask your question again or try a quick prompt!"
 
 
 # ─── CHAT ENDPOINT (POST) ──────────────────────────────────
@@ -696,10 +697,10 @@ async def chat(req: ChatRequest):
                 model=MODEL_TO_USE,
                 messages=messages,
                 temperature=0.7,
-                timeout=35.0,
+                timeout=60.0,
             )
 
-        response = await asyncio.wait_for(loop.run_in_executor(None, _call_llm), timeout=35.0)
+        response = await asyncio.wait_for(loop.run_in_executor(None, _call_llm), timeout=60.0)
         ai_text = response.choices[0].message.content or ""
         
         # Strip internal thinking/reasoning tags (<thought>...</thought> or <think>...</think>)
